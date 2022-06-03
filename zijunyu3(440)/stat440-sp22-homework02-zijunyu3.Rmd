@@ -1,0 +1,178 @@
+---
+title: "STAT 440 Statistical Data Management - Spring 2022"
+output: html_document
+---
+
+## Homework02
+### Due: Thursday February 24, 2022 11:59 pm US Central Time
+#### Created by Christopher Kinson
+
+Grading Rubric (per question):  
+2 points if complete and correct  
+1 point if incomplete or incorrect  
+0 points if no attempt made  
+
+
+**Retrieving your work**
+
+This and all future homework .Rmd files are written in Markdown. The .Rmd file can be rendered as an .html file for easier viewing. This and all future homework assignments are located in the **homework** directory within the **stat440-sp22-course-content** repo, i.e. **stat440-sp22-course-content/homework** in GitHub. It is always recommended that you **pull** (or refresh) the **stat440-sp22-course-content** repo to ensure that you have the most updated version of all course content including the homework assignments. After pulling (or refreshing) the **stat440-sp22-course-content** repo, the homework file will be in the homework directory. Once you have opened the .Rmd file, you may begin writing your answers beneath each problem. Do not remove any of the original problems from the file, because that makes it more difficult for the course staff to grade your assignment. 
+
+**Submitting your work**
+
+In your individual student repo (named as your netID), you are to submit ***two*** files:
+
+a. Your reproducible document file (.Rmd) which should be saved as homework#-netID.Rmd. For example, my homework 01 file would be saved as homework01-kinson2.Rmd.
+
+b. Your rendered reproducible document file (.html) which should be saved as homework#-netID.html. For example, my homework 01 file would be saved as homework01-kinson2.html.
+
+**Do not place your files in a sub-directory (or folder).** You have an unlimited number of submissions, but only the latest proper submission (commit and push) will be viewed and graded. **Remember the .Rmd file needs to render properly to .html before submitting.** 
+
+
+***
+
+Undergraduates are expected to complete the problems **#1-#8**. Graduate students are expected to complete all problems.
+
+**The following problems should be completed by you as an individual. If any problem asks you a particular question, be sure to answer it completely (with code, written sentences, or both). Written sentences should not appear in code chunks or code cells. Written sentences should appear in Markdown syntax unless specifically stated otherwise.**
+
+***Do not change anything in this file above the double line. Doing so will prevent your homework from being graded.***
+
+***
+***
+
+### Use the URLs to access the data. No local files allowed.
+
+
+**#1** (Markdown) Using Markdown syntax, make a non-numbered list with your first name in bold text as the first item and your last name in normal text as the second item.
+
+**Answer:**
+
+- **Zijun**
+- Yu
+
+**#2** (Personal survey, Markdown) Think about the previous two weeks (your experiences, assignments, and life). Using Markdown, describe in paragraph form (with at least 3 complete sentences): what was the most challenging part(s) about those weeks, and the thing(s) that made your weeks successful or unsuccessful.
+
+**Answer:It is very hard for to me to understand vectorization. I think the labs are getting more difficult, which is not easy to finish in 50 minutes. I got to know more friends in class, so I learned a lot of knowledge and programming from them.** 
+
+**#3** (Loops and conditional execution, Markdown)
+
+statement: The `while` loop condition is checked at the top of the loop.
+
+If the statement is true, then write TRUE below in all caps. Otherwise write FALSE in all caps.
+
+**Answer:True**
+
+**#4** (Accessing and importing data via Web scraping, Markdown)
+
+statement: When using the SelectorGadget tool, the highlighted yellow text on the website represents text that we want to de-select.
+
+**Answer:True**
+
+**#5** (Vectorization, Markdown) 
+
+statement: The `sum()` function is a vectorized function.
+
+**Answer:False** 
+
+**#6** (Accessing and importing data, Arranging data, Data reduction, Data expansion) Import the Chicago Towed Vehicles Data using its URL https://uofi.box.com/shared/static/2yfvl36q1th1aq2nvhtiomhsk2uxip6u.csv and apply data management concepts to answer the following question in Markdown syntax and complete sentence(s): 
+
+- Among the 4D vehicles that were towed, what was the third most common Make? 
+
+Data description: This dataset contains 3470 rows and 10 variables. The subjects are locations for vehicles that have been towed and impounded by the City of Chicago. Illegally parked vehicles, abandoned vehicles and vehicles used for illegal activities may be towed. Original source is City of Chicago.
+
+**Answer:TOYT is the third most common Make among the 4D vehicles were towed.**
+
+```{r prob6}
+library(readr)
+library(tidyverse)
+d4 <- read_csv("https://uofi.box.com/shared/static/2yfvl36q1th1aq2nvhtiomhsk2uxip6u.csv")
+
+```
+```{r}
+d4d <- d4 %>%
+  select('Make','Style') %>%
+  filter(Style == '4D')
+print(d4d)
+sort(table(d4d$Make), decreasing = TRUE)
+```
+
+**#7** (Accessing and importing data, Arranging data, Data reduction, Data expansion,  Vectorization, Markdown) Import the Chicago Public Chauffeurs Data using its URL https://uofi.box.com/shared/static/4qcdq6qtofbtn3m7ifrnxaahzv6x1x0r.csv and apply data management concepts to answer the following question in Markdown syntax and complete sentence(s):
+
+- Which driver is the longest-serving active public chauffeur in operation in Chicago and for how many years?
+
+Data description: The dataset contains 22752 rows and 12 columns. The subjects are public chauffeurs in business in Chicago with licenses and various vehicle types. Original source is City of Chicago.
+
+**Answer:MIRANDA, GILBERTO is the longest-serving active public chauffeur in operation in chicago for 68 years**
+
+```{r prob7}
+library(tidyverse)
+library(readr)
+driver <- read_csv("https://uofi.box.com/shared/static/4qcdq6qtofbtn3m7ifrnxaahzv6x1x0r.csv", 
+    col_types = cols(`Status Date` = col_date(format = "%m/%d/%Y"), 
+        `Original Issue Date` = col_date(format = "%m/%d/%Y")))
+
+
+driver2 <- driver %>%
+  mutate(diff = difftime(`Original Issue Date`,`Status Date`,unit="days")) %>%
+  filter(Status == "ACTIVE", `Chauffeur City` == "CHICAGO")
+
+driver3 <- driver2[order(as.Date(driver2$`Original Issue Date`, format="%m/%d/%Y")),]
+
+#driver3 <- driver2[order(driver2$diff),]
+
+today <- as.Date("2022-02-18")
+
+print(driver3)
+
+#print((driver3$diff[1])/365)
+
+as.numeric(difftime(today, driver3$`Original Issue Date`[1], unit = "days")) / 365
+```
+
+**#8** (Accessing and importing data, Arranging data, Data reduction, Data expansion, Loops and conditional execution, Apply family of functions, Vectorization, Markdown) Import the Chicago Public Schools Progress Report Cards Data using its URL https://uofi.box.com/shared/static/iwdcncwuotz0wv8ax6yv1dbfjdtdrp1y.csv and address the following:
+
+- Statement: Among all high schools in Chicago with at least 80% of Freshmen on Track, the average of the 11th Grade Average ACT score is greater than or equal to 21. **If the statement is TRUE, then write TRUE and provide evidence of your answer. If the statement is FALSE, then write FALSE and provide evidence of your answer.**
+
+Data description: The dataset contains 566 rows and 79 columns. The subjects are schools in the Chicago Public School system and their performance in various metrics of education. Some columns in this dataset include School ID and name, the type of school, Average student attendance, Rate of misconducts, 11th grade average ACT, Graduation rate, Freshmen on track %, Ward, and Location. Original source is City of Chicago.
+
+**Answer:FALSE**
+
+```{r prob8}
+library(tidyverse)
+library(readr)
+student <- read_csv("https://uofi.box.com/shared/static/iwdcncwuotz0wv8ax6yv1dbfjdtdrp1y.csv")
+
+student1 <- student %>%
+  filter(`11th Grade Average ACT (2011)`!= "NDA",`Elementary, Middle, or High School` == "HS",`Freshman on Track Rate %`>= 80.0)
+  
+
+head(student1, 20)
+
+act = mean(as.numeric(student1$`11th Grade Average ACT (2011)`))
+
+print(act >= 21)
+   
+```
+
+**#9** (Accessing and importing data, Reshaping data, Arranging data, Data reduction, Data expansion, Loops and conditional execution, Apply family of functions, Vectorization) Import the Chicago Crimes Data using its URL https://uofi.box.com/shared/static/xiipn7u18rcddau1q0elih3y7jcusket.csv and address the following:
+
+- Among the case numbers with only one record (i.e. no duplicate case numbers) and arrests made, reshape the data using loops and conditional execution (not pivot_longer/pivot_wider) such that each Case number now has two rows and 2 new columns: one new column is "CrimeDescription" which takes its values from the Primary Description and Secondary Description columns' values, and second new column is "DescriptionType" takes its names from the names of the Primary Description and Secondary Description. Now, print the first 10 rows of the resulting data. **If a case number appears more than once, do not include it at all; consider it as the set of duplicate case numbers. This problem is asking about the set of non-duplicated case numbers.**
+
+Data description: The dataset contains 204133 rows and 17 columns. The subjects are reported crimes in Chicago such that some crimes have been resolved and others are not. Some of the data columns are Case number, Date of occurrence, Block, IUC, Primary description, Secondary description, Location description, and Arrest. Original source is City of Chicago.
+
+**Answer:** 
+
+```{r prob9}
+
+```
+
+**#10** (Accessing and importing data, Arranging data, Data reduction, Data expansion, Apply family of functions, Vectorization, Markdown) Import the Chicago 311 Service Requests for Abandoned Vehicles Data using its URL https://uofi.box.com/shared/static/7xlt7wshxuckkdiyqcs9i2e8mlaa2rg3.csv and address the following:
+
+- Using the loops and conditional execution, for each non-missing Ward show the median number of days the vehicles had been reported as parked.
+
+Data description: The dataset contains 261486 observations and 22 columns. The subjects are reports of abandoned vehicles around Chicago such that those reports are made to Chicago's 311 service. A vehicle can be classified as abandoned if it meets one or more of the following criteria: 1) On a public way in a state of disrepair as to be incapable of being driven in its present condition. 2) Has not been moved or used for more than seven consecutive days and is apparently deserted. 3) Has been left on the public way without state registration or a temporary state registration placard for two or more days. 4) Is a hazardous dilapidated vehicle left in full view of the general public, whether on public or private property. Requests that have been labeled as Duplicates are in the same geographic area and have been entered into 311 Customer Service Requests (CSR) system at around the same time as a previous request. Duplicate reports/requests are labeled as such in the Status field, as either "Open - Dup" or "Completed - Dup." Original source is City of Chicago.
+
+**Answer:** 
+
+```{r prob10}
+
+```

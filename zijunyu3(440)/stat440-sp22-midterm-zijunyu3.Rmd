@@ -1,0 +1,281 @@
+---
+title: "STAT 440 Statistical Data Management - Spring 2022"
+output: html_document
+---
+
+## Midterm Exam 
+### Due: Friday March 11, 2022 11:59 pm US Central Time
+#### Created by Christopher Kinson
+
+Grading Rubric (per question):  
+2 points if complete and correct  
+1 point if incomplete or incorrect  
+0 points if no attempt made  
+
+
+**Retrieving your work**
+
+This and all future midterm .Rmd files are written in Markdown. The .Rmd file can be rendered as an .html file for easier viewing. This and all future exams are located in the **exams** directory within the **stat440-sp22-course-content** repo, i.e. **stat440-sp22-course-content/exams** in GitHub. It is always recommended that you **pull** (or refresh) the **stat440-sp22-course-content** repo to ensure that you have the most updated version of all course content including the midterm assignments. After pulling (or refreshing) the **stat440-sp22-course-content** repo, the midterm file will be in the midterm directory. Once you have opened the .Rmd file, you may begin writing your answers beneath each problem. Do not remove any of the original problems from the file, because that makes it more difficult for the course staff to grade your assignment. 
+
+**Submitting your work**
+
+In your individual student repo (named as your netID), you are to submit ***two*** files:
+
+a. Your reproducible document file (.Rmd) which should be saved as midterm-netID.Rmd. For example, my midterm file would be saved as midterm-kinson2.Rmd.
+
+b. Your rendered reproducible document file (.html) which should be saved as midterm-netID.html. For example, my midterm file would be saved as midterm-kinson2.html.
+
+**Do not place your files in a sub-directory (or folder).** You have an unlimited number of submissions, but only the latest proper submission (commit and push) will be viewed and graded. **Remember the .Rmd file needs to render properly to .html before submitting.** 
+
+
+***
+
+All students are expected to complete all problems.
+
+**The following problems should be completed by you as an individual. If any problem asks you a particular question, be sure to answer it completely (with code, written sentences, or both). Written sentences should not appear in code chunks or code cells. Written sentences should appear in Markdown syntax unless specifically stated otherwise.**
+
+***Do not change anything in this file above the double line. Doing so will prevent your midterm from being graded.***
+
+***
+***
+
+### Use the URLs to access the data (if any). No local files allowed.
+
+**#1** Using Markdown syntax, make a numbered list with your first and last name in normal text as the first item and your NetID in all lower case letters.
+
+**Answer:** 
+
+1. Zijun Yu
+2. zijunyu3
+
+**#2** Using Markdown syntax and at least two complete sentences, what was your most memorable moment being in this class this semester? If there were none, why do you think that is?
+
+**Answer:I got many challenges on data analysis in this semester, which improves my understanding in statistics. Besides, I made many friends here by working with them during lab.** 
+
+**#3** Typically, the amount of study time outside of class needed to do well on lab assignments is:
+
+i. Much more time than I thought  
+ii. Somewhat more time than I thought
+iii. Just enough time  
+iv. Somewhat less time than I thought  
+v. Much less time than I thought  
+
+**Answer:iv** 
+
+**#4** Using Markdown syntax and at least two complete sentences, would you take another course with this instructor? Explain your answer.
+
+**Answer:I would take another course this the same instructor. I appreciate the flexible grading and teaching methods of Dr. Kinson.I am looking forward to taking another course with him.** 
+
+**#5** If the statement below is TRUE, then write TRUE in the **Answer** section. If the statement below is FALSE, then write FALSE.
+
+- Statement: Semi-structured data is human readable text with some structures such as punctuation and other characters to separate fields, and observations. 
+
+**Answer:FALSE; because only the information within semi-structured data is in human-readable text, and it is organized by tags and attributes ** 
+
+**#6** If the statement below is TRUE, then write TRUE in the **Answer** section and provide evidence (code and results) of your answer. If the statement below is FALSE, then write FALSE in the **Answer** section and provide evidence (code and results) to the contrary.
+
+- Statement: R's `if` statement is vectorized. 
+
+**Answer:FALSE; Here are some vectorized functions in base R: ifelse(), is.na(), sqrt(), log(), abs(), and if statement is not one of vectorized. Besides, if statement only returns a single value, which si not vectorization**
+
+```{r prob6}
+n = 2
+if (n>3) 
+  print(FALSE)
+n = 4
+if (n>3) 
+  print(FALSE)
+```
+
+
+**#7** If the statement below is TRUE, then write TRUE in the **Answer** section and provide evidence (code and results) of your answer. If the statement below is FALSE, then write FALSE in the **Answer** section and provide evidence (code and results) to the contrary.
+
+- Statement: In R's tidyverse, the `select()` function can be used to add new columns based on existing columns.
+
+**Answer:FALSE, The mutate() function is what we’ll use to create the new information and make that new information appears in the data set, not select(). We select certain columns using the select() function.**
+
+```{r prob7}
+library(tidyverse)
+sun = data.frame(x = c(1,2,3),y=c(2,3,4),z=c(3,4,5))
+sun = sun%>%
+  select(y)
+sun
+```
+
+**#8** Import the FBI's Crimes in the United States 2019 Data using its data URL https://uofi.box.com/shared/static/1eiwgwuamz1435dm494a11ot9p0go4tf.csv and print the structure of the data. This structure should match the data description below.
+
+- Data Key for FBI's Crimes in the United States 2019: The data key is a more thorough description of columns and background information is useful and found here https://uofi.box.com/shared/static/8ssxtsjk2d5crwar34ur845laeez2dw8.pdf.
+
+- Data Description for FBI's Crimes in the United States 2019: The dataset contains 1933 rows and 12 columns (ignoring irrelevant headers and footnotes), while the truly useful data dimension may be much smaller; **rectifying the useful data will be handled in later problems**. The data contains crime counts and rates based on population in various metropolitan statistical areas (MSA). The crimes are voluntarily reported to the FBI's Uniform Crime Reporting Program by agencies in each MSA. Some MSAs are not represented in this data. The original source is the FBI Uniform Crime Reporting Data Program https://www.fbi.gov/services/cjis/ucr.
+
+**Answer:**
+
+```{r prob8}
+library(readr)
+lala <- read_csv("https://uofi.box.com/shared/static/1eiwgwuamz1435dm494a11ot9p0go4tf.csv", 
+    col_types = cols(...3 = col_number(), 
+        ...4 = col_number(), ...5 = col_number(), 
+        ...6 = col_number(), ...7 = col_number(), 
+        ...8 = col_number(), ...9 = col_number(), 
+        ...10 = col_number(), ...11 = col_number(), 
+        ...12 = col_number()))
+
+
+library(tidyverse)
+library(dplyr)
+lala2 <- lala %>%
+  slice(-c(1,2,3,1937,1938,1939,1940,1941,1942))%>%
+  rename(`Metropolitan Statistical Area` = `Table 6` )%>%
+  rename(`Counties/principal cities` = ...2)%>%
+  rename(Population = ...3)%>%
+  rename(`Violent_ratePer100K` = ...4)%>%
+  rename(`Murder_ratePer100K` = ...5)%>%
+  rename(`Rape_ratePer100K` = ...6)%>%
+  rename(`Robbery_ratePer100K` = ...7)%>%
+  rename(`Aggravated_assault_ratePer100K` = ...8)%>%
+  rename(`Property_crime_ratePer100K` = ...9)%>%
+  rename(`Burglary_ratePer100K`= ...10)%>%
+  rename(`Larceny_theft_ratePer100K` = ...11)%>%
+  rename(`Motor_vehicle_theft_ratePer100K` = ...12)
+
+str(lala2)
+  
+  
+
+
+```
+
+**#9** Using the imported data in **Problem 8** and a programming language, perform any and all data management concepts such that your resulting data's structure matches the structure in the image below. You must print your data's structure.
+
+![img11](https://github.com/kinson2/fefa2021/raw/main/img11.png)
+
+**Answer:**
+
+```{r prob9}
+lala3 <- lala2 %>%
+  filter(`Counties/principal cities`=="Rate per 100,000 inhabitants")%>%
+  select(-`Metropolitan Statistical Area`,-Population)
+
+lala4 <- lala2 %>%
+  drop_na(`Metropolitan Statistical Area`) %>%
+  select(`Metropolitan Statistical Area`,Population)
+
+lala5 = cbind(lala4,lala3)
+
+lala5 = lala5%>%
+  select(-`Counties/principal cities`)
+str(lala5)
+```
+
+**#10** Using the imported data in **Problem 8** and a programming language, perform any and all data management concepts such that your resulting data's structure, head, and tail matches the structure, head, and tail results in the image below. You must print your data's structure, head, and tail.
+
+![img11](https://github.com/kinson2/fefa2021/raw/main/img12.png)
+
+**Answer:**
+
+```{r prob10}
+city00 <- str_split(lala5$`Metropolitan Statistical Area`," M.S.A.",simplify=TRUE)
+city02 <- str_remove_all(city00[,1], " ")
+
+lala6 <- lala5 %>%
+  mutate(`Metropolitan Statistical Area` = city02)%>%
+  mutate(`Metropolitan Statistical Area` = replace(`Metropolitan Statistical Area`, `Metropolitan Statistical Area` == "Aguadilla-Isabela,PuertoRico", "Aguadilla-Isabela,PR"))%>%
+  mutate(`Metropolitan Statistical Area` = replace(`Metropolitan Statistical Area`, `Metropolitan Statistical Area` == "Arecibo,PuertoRico", "Arecibo,PR"))%>%
+  mutate(`Metropolitan Statistical Area` = replace(`Metropolitan Statistical Area`, `Metropolitan Statistical Area` == "Guayama,PuertoRico", "Guayama,PR"))%>%
+  mutate(`Metropolitan Statistical Area` = replace(`Metropolitan Statistical Area`,`Metropolitan Statistical Area` == "Mayaguez,PuertoRico", "Mayaguez,PR"))%>%
+  mutate(`Metropolitan Statistical Area` = replace(`Metropolitan Statistical Area`, `Metropolitan Statistical Area` == "Ponce,PuertoRico", "Ponce,PR"))%>%
+  mutate(`Metropolitan Statistical Area` = replace(`Metropolitan Statistical Area`, `Metropolitan Statistical Area` == "SanGerman,PuertoRico", "SanGerman,PR"))%>%
+  mutate(`Metropolitan Statistical Area` = replace(`Metropolitan Statistical Area`, `Metropolitan Statistical Area` == "SanJuan-Bayamon-Caguas,PuertoRico", "SanJuan-Bayamon-Caguas,PR"))%>%
+  mutate(`Metropolitan Statistical Area` = replace(`Metropolitan Statistical Area`, `Metropolitan Statistical Area` == "Yauco,PuertoRico", "Yauco,PR"))
+
+str(lala6)
+slice_head(lala6,n=10)
+slice_tail(lala6,n=10)
+```
+
+**#11** According to the FBI Uniform Crime Reporting Data Program, their descending order of UCR crimes protocol states "the descending order of UCR violent crimes are murder and non-negligent manslaughter, rape, robbery, and aggravated assault, followed by the property crimes of burglary, larceny-theft, and motor vehicle theft." Use this information to arrange the resulting data in **Problem 8** following the descending order of UCR crimes protocol and print the first 20 rows. **The two columns - violent crime rate and property crime rate - should not be included in the result. It's acceptable that the result is not clean.** 
+
+**Answer:**
+
+```{r prob11}
+lala_UCR <- lala2 %>%
+  arrange(desc(`Murder_ratePer100K`),desc(`Rape_ratePer100K`),desc(`Robbery_ratePer100K`),desc(`Aggravated_assault_ratePer100K`),desc(`Burglary_ratePer100K`),desc(`Larceny_theft_ratePer100K`),desc(`Motor_vehicle_theft_ratePer100K`)) %>%
+  select(-`Violent_ratePer100K`,-`Property_crime_ratePer100K`)
+
+slice_head(lala_UCR,n=20)
+
+```
+
+**#12** The crime rates per 100K inhabitants in the results for previous problems did not exclusively come from only considering the Total area actually reporting section of the MSAs (in the original dataset); some MSAs did have the Total area actually reporting as 100.0%, but several do not. This means that the crime rates per 100K inhabitants may be incorrectly calculated. Re-calculate the 9 crime rates per 100K inhabitants using the counts from the Total area actually reporting section of the MSAs (in the original dataset). Then, arrange the results following the descending order of UCR crimes protocol and print first 20 rows. **Las Cruces, NM MSA does not have a Total area actually reporting section (in the original dataset); thus this MSA should be removed. There should be 326 MSAs after removing Las Cruces, NM MSA. Prior to arranging and printing the first 20 rows, your result should have 326 rows and 11 columns. Looking carefully at the original dataset in Problem 8 may be helpful.**
+
+**Answer:**
+
+```{r prob12}
+which(lala2$`Metropolitan Statistical Area` == 'Las Cruces, NM M.S.A.')
+
+lala100 <- lala2 %>%
+  slice(-c(880,881,882,883,884))
+
+lala100a <- lala100 %>%
+  filter(`Counties/principal cities`=="Total area actually reporting")%>%
+  select(-`Metropolitan Statistical Area`,-Population)
+
+lala100b <- lala100 %>%
+  drop_na(`Metropolitan Statistical Area`) %>%
+  select(`Metropolitan Statistical Area`,Population)
+
+lala100c = cbind(lala100b,lala100a)
+
+lala100d <- lala100c%>%
+  select(-`Counties/principal cities`)%>%
+  arrange(desc(`Murder_ratePer100K`),desc(`Rape_ratePer100K`),desc(`Robbery_ratePer100K`),desc(`Aggravated_assault_ratePer100K`),desc(`Burglary_ratePer100K`),desc(`Larceny_theft_ratePer100K`),desc(`Motor_vehicle_theft_ratePer100K`))
+
+
+slice_head(lala100d,n=20)
+
+
+```
+
+**#13** Now that we see different crime rates per 100K inhabitants when considering the Total area actually reporting in the Counties/principal cities section (in the original dataset), let's do more. Create a new dataset such that the only MSAs kept are those with 100.0% Total area actually reporting and the crime rates per 100K inhabitants are re-calculated based on the crime counts for these MSAs reporting at 100.0%. This new dataset should have a new column called "Percent_of_total_area_actually_reporting" where each observation in this column should equal "100.0%" as a character-formatted column. Then, arrange the results following the descending order of UCR crimes protocol and print first 20 rows. **Prior to arranging and printing the first 20 rows, your result should have 196 rows and 12 columns. Looking carefully at the original dataset in Problem 8 may be helpful.**
+
+**Answer:**
+
+```{r prob13}
+lala1002a <- lala100 %>%
+  filter(`Counties/principal cities`=="Total area actually reporting")%>%
+  select(-`Metropolitan Statistical Area`)%>%
+  rename(`Percent_of_total_area_actually_reporting` = Population)
+
+lala1002b <- lala100 %>%
+  drop_na(`Metropolitan Statistical Area`) %>%
+  select(`Metropolitan Statistical Area`,Population)
+
+lala1002c = cbind(lala1002b,lala1002a)
+
+lala1002d <- lala1002c%>%
+  filter(`Percent_of_total_area_actually_reporting` == 100.0)%>%
+  arrange(desc(`Murder_ratePer100K`),desc(`Rape_ratePer100K`),desc(`Robbery_ratePer100K`),desc(`Aggravated_assault_ratePer100K`),desc(`Burglary_ratePer100K`),desc(`Larceny_theft_ratePer100K`),desc(`Motor_vehicle_theft_ratePer100K`))%>%
+  select(-`Counties/principal cities`)
+
+slice_head(lala1002d,n=20)
+```
+
+**#14** Suppose the United States national counts for population and crimes may be computed by summing up the counts for each MSA from the resulting data in **Problem 12** (prior to arranging and printing that result's first 20 rows). Now, calculate the United States national population and the 9 national crime rates per 100K inhabitants and combine this new national row (should have 11 columns) with the resulting data from **Problem 12** (should have 326 row and 11 columns). Then, print last 20 rows. **Prior to printing the last 20 rows, your result should have 327 rows and 11 columns. Looking carefully at the original dataset in Problem 8 may be helpful.**
+
+**Answer:**
+
+```{r prob14}
+popu = sum(lala100d$Population)
+lalatotal = data.frame(`Metropolitan`="National total",`Population` = sum(lala100d$Population),`Violent_ratePer100K`=sum(lala100d$Population/100000*lala100d$Violent_ratePer100K,na.rm = TRUE)/(popu/100000),`Murder_ratePer100K` = sum(lala100d$Population/100000*lala100d$Murder_ratePer100K,na.rm = TRUE)/(popu/100000),`Rape_ratePer100K` = sum(lala100d$Population/100000*lala100d$Rape_ratePer100K,na.rm = TRUE)/(popu/100000),`Robbery_ratePer100K` =sum(lala100d$Population/100000*lala100d$`Robbery_ratePer100K`,na.rm = TRUE)/(popu/100000) ,`Aggravated_assault_ratePer100K` =sum(lala100d$Population/100000*lala100d$`Aggravated_assault_ratePer100K`,na.rm = TRUE)/(popu/100000) ,`Property_crime_ratePer100K`=sum(lala100d$Population/100000*lala100d$`Property_crime_ratePer100K`,na.rm = TRUE)/(popu/100000) ,`Burglary_ratePer100K` = sum(lala100d$Population/100000*lala100d$`Burglary_ratePer100K`,na.rm = TRUE)/(popu/100000),`Larceny_theft_ratePer100K` = sum(lala100d$Population/100000*lala100d$`Larceny_theft_ratePer100K`,na.rm = TRUE)/(popu/100000),`Motor_vehicle_theft_ratePer100K` = sum(lala100d$Population/100000*lala100d$`Motor_vehicle_theft_ratePer100K`,na.rm = TRUE)/(popu/100000))
+
+lalatotal = lalatotal%>%
+  rename(`Metropolitan Statistical Area` = `Metropolitan`)
+  
+
+vio = rbind(lala100d,lalatotal)
+slice_tail(vio,n=20)
+```
+
+**#15** Based on the FBI's data policies on their website and in the data key, is it more reasonable to (a) compare the metropolitan statistical areas to other metropolitan statistical areas or (b) to compare the metropolitan areas to the United States? Why? **Your answers to the preceding questions should be written using Markdown syntax using complete sentences.**
+
+**Answer:For me, it is more reasonable to (b) compare the metropolitan areas to the United States. I noticed that data users should not rank crime data from "Uniform Crime Reporting Statistics:Their Proper Use", but we have to rank the metropolitan areas by crime data to compare them with each other. There are many factors to impact the volume and type of crime situation like population density or economy situation. In this way, I think it is better to compare metropolitan areas to the United states. **

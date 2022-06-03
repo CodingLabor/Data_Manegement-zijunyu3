@@ -1,0 +1,426 @@
+---
+title: "STAT 440 Statistical Data Management - Spring 2022"
+output: html_document
+---
+
+## Homework05
+### Due: Monday April 25, 2022 11:59 pm US Central Time
+#### Created by Christopher Kinson
+
+Grading Rubric (per question):  
+2 points if complete and correct  
+1 point if incomplete or incorrect  
+0 points if no attempt made  
+
+
+**Retrieving your work**
+
+This and all future homework .Rmd files are written in Markdown. The .Rmd file can be rendered as an .html file for easier viewing. This and all future homework assignments are located in the **homework** directory within the **stat440-sp22-course-content** repo, i.e. **stat440-sp22-course-content/homework** in GitHub. It is always recommended that you **pull** (or refresh) the **stat440-sp22-course-content** repo to ensure that you have the most updated version of all course content including the homework assignments. After pulling (or refreshing) the **stat440-sp22-course-content** repo, the homework file will be in the homework directory. Once you have opened the .Rmd file, you may begin writing your answers beneath each problem. Do not remove any of the original problems from the file, because that makes it more difficult for the course staff to grade your assignment. 
+
+**Submitting your work**
+
+In your individual student repo (named as your netID), you are to submit ***two*** files:
+
+a. Your reproducible document file (.Rmd) which should be saved as homework#-netID.Rmd. For example, my homework 01 file would be saved as homework01-kinson2.Rmd.
+
+b. Your rendered reproducible document file (.html) which should be saved as homework#-netID.html. For example, my homework 01 file would be saved as homework01-kinson2.html.
+
+**Do not place your files in a sub-directory (or folder).** You have an unlimited number of submissions, but only the latest proper submission (commit and push) will be viewed and graded. **Remember the .Rmd file needs to render properly to .html before submitting.** 
+
+
+***
+
+Undergraduates are expected to complete the problems **#1-#8**. Graduate students are expected to complete all problems. If undergraduates would like this homework assignment to be used as their final project, then they must complete all problems.
+
+**The following problems should be completed by you as an individual. If any problem asks you a particular question, be sure to answer it completely (with code, written sentences, or both). Written sentences should not appear in code chunks or code cells. Written sentences should appear in Markdown syntax unless specifically stated otherwise.**
+
+***Do not change anything in this file above the double line. Doing so will prevent your homework from being graded.***
+
+***
+***
+
+### Use the URLs to access the data. No local files allowed.
+
+
+**#1** This problem includes concepts from the following notes/videos: Markdown.
+
+**Problem:** Using Markdown syntax, make a numbered list with your netID in normal text as the first item and full name in normal text as the second item.
+
+**Answer:** 
+
+- zijunyu3
+- Zijun Yu
+
+**#2** This problem includes concepts from the following notes/videos: Markdown.
+
+**Problem:** Think about the previous two weeks (your experiences, assignments, and life). Using Markdown, describe in paragraph form (with at least 3 complete sentences): what was the most challenging part(s) about those weeks, and the thing(s) that made your weeks successful or unsuccessful.
+
+**Answer:Shiny and graphing tools seems very difficult to learn, as there are many methods and graph details to pay attention to. I am glad that we have more time to finish the lab. I am also excited for the summer break as I could have time to work and travel.** 
+
+**#3** This problem includes concepts from the following notes/videos: Markdown.
+
+**Problem:** Think about the entire semester (your experiences, assignments, and life). Using Markdown, describe in paragraph form (with at least 3 complete sentences): what was the most challenging part(s) about this semester, and the thing(s) that made your semester successful or unsuccessful.
+
+**Answer:Lab session really helps to practice knowledge in the notes and videos. The office hours by TA and professor could let finish homework easily. However, I am curious if there are platforms or websites allowing me to practice data analysis in R.**
+
+**#4** This problem includes concepts from the following notes/videos: Data visualization using Tidyverse, Markdown.
+
+**Problem:** If the statement below is TRUE, then write TRUE in the **Answer** section and provide evidence (code and results) that it is TRUE. If the statement below is FALSE, then write FALSE in the **Answer** section and provide evidence (code and results) that it is FALSE.
+
+- Statement: When immediately following the `ggplot()` function, the `%>%` sign (aka pipe sign) allows for additional layering of tidyverse data visualization elements.
+
+**Answer:FALSE,the right symbol should be "+" rather than "%>%"**   
+
+```{r prob4}
+library(tidyverse)
+rentals_data <- read_csv("https://uofi.box.com/shared/static/qfpwd1kcggxmpktvnjuzjxv4812ji9e5.csv", 
+    col_types = cols(`Inspection Date` = col_date(format = "%m/%d/%Y"), 
+        `Expiration Date` = col_date(format = "%m/%d/%Y")))
+
+rentals_data %>%
+  count(Grade) %>%
+  ggplot() +
+  geom_col(mapping = aes(x = Grade, y = n))
+```
+
+**#5** This problem includes concepts from the following notes/videos: Accessing and importing data, Arranging data, Data reduction, Data expansion, Loops and conditional execution, Vectorization, Regular expressions and string manipulation, Summarizing data, Combining data, SQL for weeks 03-07 content, SQL sub-queries, Tool-making and programming Part01.
+
+**Problem:** Edward Parker of The Vaccine Centre, London School of Hygiene & Tropical Medicine and Quentin Leclerc, Department of Infectious Disease Epidemiology, London School of Hygiene & Tropical Medicine have created a Shiny app called **COVID-19 tracker**. Beginning with the code in their R file called [jhu_data_weekly_cases.R](https://github.com/eparker12/nCoV_tracker/blob/master/jhu_data_weekly_cases.R), you are tasked with changing their `update_jhu()` function such that the lines of code are now utilizing tidyverse methods and code. Specifically, the lines 13-42 of their code can be improved based on data management concepts covered in this course. This problem requires you to make improvements to at least 15 lines of the total 30 lines of code in their `update_jhu()` function. **SQL is allowed.**
+
+**Answer:** 
+
+```{r prob5}
+
+#Use tidyverse method or SQL
+update_jhu = function(input_df, tag) {
+  input_df = input_df %>% rename("Province" = "Province/State","Country" = "Country/Region")
+  input_df = input_df %>%
+    mutate(Country = ifelse(Province = "Hong Kong","Hong Kong",Country)) %>%
+    mutate(Country = ifelse(Province = "Macau","Macao",Country))
+    mutate(Country = replace(Country, Country == "Taiwan*", "Taiwan")) %>%
+    mutate(Country = replace(Country, Country == "Korea, South", "RepublicofKorea")) %>%
+    mutate(Country = replace(Country, Country == "Congo (Brazzaville)", "Congo")) %>%
+    mutate(Country = replace(Country, Country == "Republic of the Congo", "Congo")) %>%
+    mutate(Country = replace(Country, Country == "Congo (Kinshasa)", "Democratic Republic of the Congo")) %>%
+    mutate(Country = replace(Country, Country == "Cote d'Ivoire", "CotedIvoire")) %>%
+    mutate(Country = replace(Country, Country == "Gambia, The", "TheGambia")) %>%
+    mutate(Country = replace(Country, Country == "Bahamas, The", "TheBahamas")) %>%
+    mutate(Country = replace(Country, Country == "Cabo Verde", "CapeVerde")) %>%
+    mutate(Country = replace(Country, Country == "Timor-Leste", "TimorLeste")) %>%
+    mutate(Country = replace(Country, Country == "Guinea-Bissau", "GuineaBissau"))
+  input_df$Country = input_df$Country %>% str_replace_all(., " ", "") 
+  dates = names(input_df)[which(names(input_df)=="1/22/20"):ncol(input_df)]
+  input_df = input_df %>% 
+    select(-c(Province, Lat, Long)) %>% 
+    group_by(Country) %>% 
+    summarise_each(funs(sum)) %>%
+    data.frame()
+  rownames(input_df) = input_df$Country
+  rownames(input_df) = paste0(input_df$Country,"_",tag)
+  input_df = input_df %>% select(-c(Country)) %>% t()
+  #input_df = data.frame(input_df) This line is unnecessary
+  input_df$Date = dates
+  rownames(input_df) = 1:nrow(input_df)
+  input_df = input_df %>% 
+    mutate(Date = format(as.Date(Date,"%m/%d/%y")))
+  input_df
+}
+```
+
+**#6** This problem includes concepts from the following notes/videos: Accessing and importing data, Arranging data, Data reduction, Data expansion, Loops and conditional execution, Vectorization, Regular expressions and string manipulation, Summarizing data, Combining data, SQL for weeks 03-07 content, SQL sub-queries, Tool-making and programming Part01.
+
+**Problem:** Edward Parker of The Vaccine Centre, London School of Hygiene & Tropical Medicine and Quentin Leclerc, Department of Infectious Disease Epidemiology, London School of Hygiene & Tropical Medicine have created a Shiny app called **COVID-19 tracker**. Beginning with the code in their R file called [jhu_data_weekly_cases.R](https://github.com/eparker12/nCoV_tracker/blob/master/jhu_data_weekly_cases.R), you are tasked with changing the `for` loop spanning lines 81-139 such that the lines of code are now utilizing tidyverse methods and code. Specifically, the lines 81-139 of their code can be improved based on data management concepts covered in this course. This problem requires you to make improvements to at least 30 lines of the total 59 lines of code in their `for` loop. **SQL is allowed.**
+
+**Answer:** 
+
+```{r prob6}
+collated_data = NULL
+# loop to add new data for each new situation report
+for (i in c(1:nrow(jhu_merge))) {
+  
+  # extract subset of data for date in row i
+  jhu_subset = jhu_merge[i,]
+  jhu_subset_cases = jhu_subset[,which(grepl("_cases", names(jhu_subset)))]
+  jhu_subset_cases = jhu_subset_cases[,2:i]
+  jhu_subset_deaths = jhu_subset[,i:200]
+
+   # build new dataframe to add updated data
+  new_data = data.frame(jhu_ID = names(jhu_subset_cases) %>% str_replace_all(., "_cases", ""),
+                        date = format(as.Date(jhu_subset$Date[1],"%Y-%m-%d")),
+                        update = i,
+                        cases = NA, new_cases = 0,
+                        deaths = 0, new_deaths = 0)
+  
+  # update column names in new_jhu dataframes to include country names only
+  colnames(jhu_subset_cases) = colnames(jhu_subset_cases) %>% str_replace_all(., "_cases", "") 
+  colnames(jhu_subset_deaths) = colnames(jhu_subset_deaths) %>% str_replace_all(., "_deaths", "") 
+
+  # loop to update cases
+  for (j in 1:nrow(new_data)) {
+    # update case numbers
+    country_name = as.character(new_data$jhu_ID[j])
+    new_data$cases[j] = jhu_subset_cases[,country_name:i]
+    new_data$deaths[j] = jhu_subset_deaths[,country_name:i]
+  }
+  
+  # append new data to collated dataframe
+  collated_data = bind_rows(collated_data, new_data)
+  collated_data = collated_data %>%
+    mutate(jhu_ID = as.character(collated_data$jhu_ID))
+  
+  # calculate new cases and deaths
+  if (i == 1) {
+    collated_data$new_cases = collated_data$cases
+    collated_data$new_deaths = collated_data$deaths
+  }
+  
+  if (i > 1) {
+    # split it into date i and date i-1
+    today = subset(collated_data, update==i)
+    yesterday = subset(collated_data, update==(i-1))
+    
+    for (k in 1:nrow(today)) {
+      country_name = today$jhu_ID[k]
+      
+      # if present in yesterday's data, calculate new cases by subtraction
+      if (country_name %in% yesterday$jhu_ID) {
+        collated_data$new_cases[collated_data$jhu_ID==country_name & collated_data$update==i] = today$cases[today$jhu_ID==country_name] - yesterday$cases[yesterday$jhu_ID==country_name] 
+        collated_data$new_deaths[collated_data$jhu_ID==country_name & collated_data$update==i] = today$deaths[today$jhu_ID==country_name] - yesterday$deaths[yesterday$jhu_ID==country_name] 
+      } else {
+        # if absent from yesterday's data, new observations = total observations
+        collated_data$new_cases[collated_data$jhu_ID==country_name & collated_data$update==i] = today$cases[today$jhu_ID==country_name] 
+        collated_data$new_deaths[collated_data$jhu_ID==country_name & collated_data$update==i] = today$deaths[today$jhu_ID==country_name]  
+      }
+    }
+  }
+}
+```
+
+**#7** This problem includes concepts from the following notes/videos: Accessing and importing data, Arranging data, Data reduction, Data expansion, Loops and conditional execution, Vectorization, Regular expressions and string manipulation, Summarizing data, Combining data, SQL for weeks 03-07 content, SQL sub-queries, Tool-making and programming Part01.
+
+**Problem:** Edward Parker of The Vaccine Centre, London School of Hygiene & Tropical Medicine and Quentin Leclerc, Department of Infectious Disease Epidemiology, London School of Hygiene & Tropical Medicine have created a Shiny app called **COVID-19 tracker**. Beginning with the code in their R file called [app.R](https://github.com/eparker12/nCoV_tracker/blob/master/app.R), you are tasked with changing the "### DATA PROCESSING: COVID-19 ###" section (spanning lines 216-359) such that the lines of code are now utilizing tidyverse methods and code. Specifically, the lines 216-359 of their code can be improved based on data management concepts covered in this course. This problem requires you to make improvements to at least 72 lines of the total 144 lines of code in this section of code. **SQL is allowed.**
+
+**Answer:** 
+
+```{r prob7}
+### DATA PROCESSING: COVID-19 ###
+
+# extract time stamp from cv_cases
+update = tail(cv_cases$last_update,1) 
+
+# check consistency of country names across datasets
+if (all(unique(cv_cases$country) %in% unique(countries$country))==FALSE) { print("Error: inconsistent country names")}
+
+# extract dates from cv data
+if (any(grepl("/", cv_cases$date))) { 
+  cv_cases$date = format(as.Date(cv_cases$date, format="%d/%m/%Y"),"%Y-%m-%d") 
+} else { cv_cases$date = as.Date(cv_cases$date, format="%Y-%m-%d") }
+cv_cases$date = as.Date(cv_cases$date)
+cv_min_date = as.Date(min(cv_cases$date),"%Y-%m-%d")
+current_date = as.Date(max(cv_cases$date),"%Y-%m-%d")
+cv_max_date_clean = format(as.POSIXct(current_date),"%d %B %Y")
+
+# merge cv data with country data and extract key summary variables
+cv_cases = merge(cv_cases, countries, by = "country")
+cv_cases = cv_cases[order(cv_cases$date),]
+cv_cases = cv_cases %>%
+  mutate(cases_per_million = as.numeric(format(round(cv_cases$cases/(cv_cases$population/1000000),1),nsmall=1)))
+cv_cases = cv_cases %>%
+  mutate(new_cases_per_million = as.numeric(format(round(cv_cases$new_cases/(cv_cases$population/1000000),1),nsmall=1)))
+cv_cases = cv_cases %>%
+  mutate(million_pop = as.numeric(cv_cases$population>1e6))
+cv_cases = cv_cases %>%
+  mutate(deaths_per_million = as.numeric(format(round(cv_cases$deaths/(cv_cases$population/1000000),1),nsmall=1)))
+cv_cases  = cv_cases %>%
+  mutate(new_deaths_per_million = as.numeric(format(round(cv_cases$new_deaths/(cv_cases$population/1000000),1),nsmall=1)))
+
+# add variable for weeks since 100th case and 10th death
+cv_cases$weeks_since_case100 = cv_cases$weeks_since_death10 = 0
+for (i in 1:length(unique(cv_cases$country))) {
+  country_name = as.character(unique(cv_cases$country))[i]
+  country_db = subset(cv_cases, country==country_name)
+  country_db$weeks_since_case100[country_db$cases>=100] = 0:(sum(country_db$cases>=100)-1)
+  country_db$weeks_since_death10[country_db$deaths>=10] = 0:(sum(country_db$deaths>=10)-1)
+  cv_cases$weeks_since_case100[cv_cases$country==country_name] = country_db$weeks_since_case100
+  cv_cases$weeks_since_death10[cv_cases$country==country_name] = country_db$weeks_since_death10
+}
+
+# creat variable for today's data
+cv_today = subset(cv_cases, date==current_date) 
+current_case_count = sum(cv_today$cases)
+current_case_count_China = sum(cv_today$cases[cv_today$country=="Mainland China"])
+current_case_count_other = sum(cv_today$cases[cv_today$country!="Mainland China"])
+current_death_count = sum(cv_today$deaths)
+
+# create subset of state data for today's data
+if (any(grepl("/", cv_states$date))) { 
+  cv_states$date = format(as.Date(cv_states$date, format="%d/%m/%Y"),"%Y-%m-%d") 
+} else { cv_states$date = as.Date(cv_states$date, format="%Y-%m-%d") }
+cv_states_today = subset(cv_states, date==max(cv_states$date))
+
+# create subset for countries with at least 1000 cases
+cv_today_reduced = subset(cv_today, cases>=1000)
+
+# write current day's data
+write.csv(cv_today %>% select(c(country, date, update, cases, new_cases, deaths, new_deaths,
+                                cases_per_million, new_cases_per_million,
+                                deaths_per_million, new_deaths_per_million,
+                                weeks_since_case100, weeks_since_death10)), "input_data/coronavirus_today.csv")
+
+# aggregate at continent level
+cv_cases_continent = subset(cv_cases, !is.na(continent_level)) %>% select(c(cases, new_cases, deaths, new_deaths, date, continent_level)) %>% group_by(continent_level, date) %>% summarise_each(funs(sum)) %>% data.frame()
+
+# add variable for weeks since 100th case and 10th death
+cv_cases_continent$weeks_since_case100 = cv_cases_continent$weeks_since_death10 = 0
+cv_cases_continent$continent = cv_cases_continent$continent_level
+for (i in 1:length(unique(cv_cases_continent$continent))) {
+  continent_name = as.character(unique(cv_cases_continent$continent))[i]
+  continent_db = subset(cv_cases_continent, continent==continent_name)
+  continent_db$weeks_since_case100[continent_db$cases>=100] = 0:(sum(continent_db$cases>=100)-1)
+  continent_db$weeks_since_death10[continent_db$deaths>=10] = 0:(sum(continent_db$deaths>=10)-1)
+  cv_cases_continent$weeks_since_case100[cv_cases_continent$continent==continent_name] = continent_db$weeks_since_case100
+  cv_cases_continent$weeks_since_death10[cv_cases_continent$continent==continent_name] = continent_db$weeks_since_death10
+}
+
+# add continent populations
+cv_cases_continent$pop = NA
+cv_cases_continent$pop[cv_cases_continent$continent=="Africa"] = 1.2e9
+cv_cases_continent$pop[cv_cases_continent$continent=="Asia"] = 4.5e9
+cv_cases_continent$pop[cv_cases_continent$continent=="Europe"] = 7.4e8
+cv_cases_continent$pop[cv_cases_continent$continent=="North America"] = 5.8e8
+cv_cases_continent$pop[cv_cases_continent$continent=="Oceania"] = 3.8e7
+cv_cases_continent$pop[cv_cases_continent$continent=="South America"] = 4.2e8
+
+# add normalised counts
+cv_cases_continent$cases_per_million =  as.numeric(format(round(cv_cases_continent$cases/(cv_cases_continent$pop/1000000),1),nsmall=1))
+cv_cases_continent$new_cases_per_million =  as.numeric(format(round(cv_cases_continent$new_cases/(cv_cases_continent$pop/1000000),1),nsmall=1))
+cv_cases_continent$deaths_per_million =  as.numeric(format(round(cv_cases_continent$deaths/(cv_cases_continent$pop/1000000),1),nsmall=1))
+cv_cases_continent$new_deaths_per_million =  as.numeric(format(round(cv_cases_continent$new_deaths/(cv_cases_continent$pop/1000000),1),nsmall=1))
+write.csv(cv_cases_continent, "input_data/coronavirus_continent.csv")
+
+# aggregate at global level
+cv_cases_global = cv_cases %>% select(c(cases, new_cases, deaths, new_deaths, date, global_level)) %>% group_by(global_level, date) %>% summarise_each(funs(sum)) %>% data.frame()
+cv_cases_global$weeks_since_case100 = cv_cases_global$weeks_since_death10 = 0:(nrow(cv_cases_global)-1)
+
+# add normalised counts
+cv_cases_global$pop = 7.6e9
+cv_cases_global = cv_cases_global %>%
+  mutate(cases_per_million =  as.numeric(format(round(cv_cases_global$cases/(cv_cases_global$pop/1000000),1),nsmall=1)))
+cv_cases_global = cv_cases_global %>%
+  mutate(new_cases_per_million =  as.numeric(format(round(cv_cases_global$new_cases/(cv_cases_global$pop/1000000),1),nsmall=1)))
+cv_cases_global = cv_cases_global %>%
+  mutate(deaths_per_million =  as.numeric(format(round(cv_cases_global$deaths/(cv_cases_global$pop/1000000),1),nsmall=1)))
+cv_cases_global = cv_cases_global %>%
+  mutate(new_deaths_per_million =  as.numeric(format(round(cv_cases_global$new_deaths/(cv_cases_global$pop/1000000),1),nsmall=1)))
+write.csv(cv_cases_global, "input_data/coronavirus_global.csv")
+
+# select large countries for mapping polygons
+cv_large_countries = cv_today %>% filter(alpha3 %in% worldcountry$ADM0_A3)
+if (all(cv_large_countries$alpha3 %in% worldcountry$ADM0_A3)==FALSE) { print("Error: inconsistent country names")}
+cv_large_countries = cv_large_countries[order(cv_large_countries$alpha3),]
+
+# create plotting parameters for map
+bins = c(0,10,50,100,500,1000,Inf)
+cv_pal <- colorBin("Oranges", domain = cv_large_countries$cases_per_million, bins = bins)
+plot_map <- worldcountry[worldcountry$ADM0_A3 %in% cv_large_countries$alpha3, ]
+
+# creat cv base map 
+basemap = leaflet(plot_map) %>% 
+  addTiles() %>% 
+  addLayersControl(
+    position = "bottomright",
+    overlayGroups = c("2019-COVID (new)", "2019-COVID (cumulative)", "2003-SARS", "2009-H1N1 (swine flu)", "2014-Ebola"),
+    options = layersControlOptions(collapsed = FALSE)) %>% 
+  hideGroup(c("2019-COVID (cumulative)", "2003-SARS", "2009-H1N1 (swine flu)", "2014-Ebola")) %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  fitBounds(~-100,-60,~60,70) %>%
+  addLegend("bottomright", pal = cv_pal, values = ~cv_large_countries$deaths_per_million,
+            title = "<small>Deaths per million</small>") 
+
+# sum cv case counts by date
+cv_aggregated = aggregate(cv_cases$cases, by=list(Category=cv_cases$date), FUN=sum)
+names(cv_aggregated) = c("date", "cases")
+
+# add variable for new cases in last 7 days
+for (i in 1:nrow(cv_aggregated)) { 
+  if (i==1) { cv_aggregated$new[i] = 0 }
+  if (i<1) { cv_aggregated$new[i] = cv_aggregated$cases[i] + cv_aggregated$cases[i-1] }
+}
+
+# add plotting region
+cv_aggregated$region = "Global"
+cv_aggregated$date = as.Date(cv_aggregated$date,"%Y-%m-%d")
+
+# assign colours to countries to ensure consistency between plots 
+cls = rep(c(brewer.pal(8,"Dark2"), brewer.pal(10, "Paired"), brewer.pal(12, "Set3"), brewer.pal(8,"Set2"), brewer.pal(9, "Set1"), brewer.pal(8, "Accent"),  brewer.pal(9, "Pastel1"),  brewer.pal(8, "Pastel2")),4)
+cls_names = c(as.character(unique(cv_cases$country)), as.character(unique(cv_cases_continent$continent)), as.character(unique(cv_states$state)),"Global")
+country_cols = cls[1:length(cls_names)]
+names(country_cols) = cls_names
+
+```
+
+**#8** This problem includes concepts from the following notes/videos: Accessing and importing data, Arranging data, Data reduction, Data expansion, Loops and conditional execution, Vectorization, Regular expressions and string manipulation, Summarizing data, Combining data, SQL for weeks 03-07 content, SQL sub-queries, Tool-making and programming Part01, Data visualization using base R, Data visualization using Tidyverse.
+
+**Problem:** Edward Parker of The Vaccine Centre, London School of Hygiene & Tropical Medicine and Quentin Leclerc, Department of Infectious Disease Epidemiology, London School of Hygiene & Tropical Medicine have created a Shiny app called **COVID-19 tracker**. Beginning with the code in their R file called [app.R](https://github.com/eparker12/nCoV_tracker/blob/master/app.R), you are tasked with changing the "# function to plot new cases by region" section (spanning lines 106-134) such that the lines of code and their resulting data visualizations are now improved. Specifically, the lines 106-134 of their code can be improved based on data management concepts covered in this course including data visualization concepts of macro and micro elements. This problem requires you to make improvements to at least 14 lines of the total 28 lines of code in this section of code. **SQL is allowed.**
+
+**Answer:** 
+
+```{r prob8}
+# function to plot new cases by region
+country_cases_plot = function(cv_cases, start_point=c("Date", "Week of 100th confirmed case", "Week of 10th death"), plot_start_date) {
+  if (start_point=="Date") {
+    g = ggplot(cv_cases, aes(x = date, color = "blue",y = new_outcome, fill = region, group = 1,
+                             text = paste0(format(date, "%d %B %Y"), "\n", region, ": ",new_outcome))) + 
+      xlim(c(plot_start_date,(current_date+5))) + xlab("Date")
+  }
+  
+  if (start_point=="Week of 100th confirmed case") {
+    cv_cases = subset(cv_cases, weeks_since_case100>0)
+    g = ggplot(cv_cases, aes(x = weeks_since_case100, y = new_outcome, fill = region, group = 1,
+                             text = paste0("Week ",weeks_since_case100, "\n", region, ": ",new_outcome)))+
+      xlab("Weeks since 100th confirmed case") #+ xlim(c(plot_start_date,(current_date+5))) 
+  }
+  
+  if (start_point=="Week of 10th death") {
+    cv_cases = subset(cv_cases, weeks_since_death10>0)
+    g = ggplot(cv_cases, aes(x = weeks_since_death10, y = new_outcome, color="red",fill = region, group = 1,
+                             text = paste0("Week ",weeks_since_death10, "\n", region, ": ",new_outcome))) +
+      xlab("Weeks since 10th death") #+ xlim(c(plot_start_date,(current_date+5))) 
+  }
+  
+  g1 = g +
+    gg_plot(position="stack", stat="identity") + 
+    ylab("New (weekly)") + theme_bw() + 
+    scale_fill_manual(values=country_cols) +
+    theme(legend.title = element_blank(), legend.position = "", plot.title = element_text(size=10))
+  ggplotly(g1, tooltip = c("text")) %>% layout(legend = list(font = list(size=11)))
+}
+```
+
+**#9** This problem includes concepts from the following notes/videos: Data visualization using base R, Data visualization using Tidyverse, Shiny apps and dashboards.
+
+**Problem:** Edward Parker of The Vaccine Centre, London School of Hygiene & Tropical Medicine and Quentin Leclerc, Department of Infectious Disease Epidemiology, London School of Hygiene & Tropical Medicine have created a Shiny app called **COVID-19 tracker**. Beginning with the code in their R file called [app.R](https://github.com/eparker12/nCoV_tracker/blob/master/app.R), you are tasked with changing the "### SHINY SERVER ###" section (spanning lines 466-668) such that the lines of code are now improved visually for the user interface. Specifically, the lines 466-668 of their code can be improved based on data management concepts covered in this course. This problem requires you to make improvements to the Shiny user interface section. 
+
+**Answer:** 
+
+```{r prob9}
+
+```
+
+**#10** This problem includes concepts from the following notes/videos: Accessing and importing data, Arranging data, Data reduction, Data expansion, Loops and conditional execution, Vectorization, Regular expressions and string manipulation, Summarizing data, Combining data, SQL for weeks 03-07 content, SQL sub-queries, Tool-making and programming Part01, Data visualization using base R, Data visualization using Tidyverse, Markdown.
+
+**Problem:** Edward Parker of The Vaccine Centre, London School of Hygiene & Tropical Medicine and Quentin Leclerc, Department of Infectious Disease Epidemiology, London School of Hygiene & Tropical Medicine have created a Shiny app called **COVID-19 tracker**. Beginning with the code that you changed in both R files called [jhu_data_weekly_cases.R](https://github.com/eparker12/nCoV_tracker/blob/master/jhu_data_weekly_cases.R) and [app.R](https://github.com/eparker12/nCoV_tracker/blob/master/app.R), you are tasked with adding comments explaining the code that you changed. Your comments need not explain why you changed the code. But your comments should explain to the user what the new code does.
+
+**Answer:** 
+
+```{r prob10}
+
+```
+
+## FINAL PROJECT CONSIDERATION
+
+The Instructor recognizes that this assignment is quite involved for students. Thus, students are allowed to claim this homework assignment as their final project. This means that this homework assignment will be graded as out of 20 points and that grade will then be converted to be out of 40 points for the final project score. In total, this one assignment will be worth 60 points for students who desire so.
+
+If you would like this assignment to be treated as your final project, then complete all problems above and show the code for the improved shiny app below this prompt in a code chunk. This shiny app code should include the improvements completed in problems above as well as any other improvements you deem necessary. 
+
+If you do not wish to have this homework assignment count for the final project, then only the the required number of problems for your classification (undergraduate or graduate student). But this means that you must still complete the final project.

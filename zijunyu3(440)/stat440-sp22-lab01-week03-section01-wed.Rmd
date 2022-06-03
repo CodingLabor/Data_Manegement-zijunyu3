@@ -1,0 +1,74 @@
+# STAT 440 Statistical Data Management - Spring 2022
+## Week03 Lab01 Wed
+### Both .Rmd and .html files must be submitted by 11:00 am. Any lab submitted after 11:00 am will be deducted 2 points for being late. Labs submitted after the lab solution is posted will not be accepted; resulting in a 0 for that driver's lab.
+#### Only the driver should submit this assignment into their individual student repo. Save the filename as lab01-week03-section01-wed-netID.Rmd and render this file to .html. 
+
+**#1** (Syllabus, Markdown) Using Markdown syntax, make a numbered list with the first and last names of everyone at your station. Your name should appear in bold text.
+
+**Answer:**
+**1.Zijun Yu**
+
+**#2** (Structures of data, delimiters, and file extensions, Markdown)
+
+statement: Ampersands can be used as delimiters in a data file.
+
+If the statement is true, then write TRUE below in all caps. Otherwise write FALSE in all caps.
+
+**Answer:FALSE**
+
+**#3** (Accessing and importing data) Import the Champaign Zoning Special Use Permits Data using its URL https://gis-cityofchampaign.opendata.arcgis.com/datasets/cityofchampaign::zoning-special-use-permits.csv?outSR=%7B%22latestWkid%22%3A3857%2C%22wkid%22%3A102100%7D such that your resulting data structure matches the structure in the image below. **You must print the structure of your data.**  
+
+![img03](https://uofi.box.com/shared/static/btus23luk91x879qwvhqbxdmyj17t5xt.png)
+
+**Answer:**
+```{r}
+library(tidyverse)
+rental_data <- readr::read_csv("https://gis-cityofchampaign.opendata.arcgis.com/datasets/cityofchampaign::zoning-special-use-permits.csv?outSR=%7B%22latestWkid%22%3A3857%2C%22wkid%22%3A102100%7D") 
+str(rental_data)
+
+```
+
+
+**#4** (Accessing and importing data) Import the Rental Inspection Grades Listing Data using its data URL https://uofi.box.com/shared/static/1mi85x78tljopsjv36ap9bwcpqwi9rlv.txt such that your resulting data structure matches the structure in the image below. **You must print the structure of your data.**  
+
+![img04](https://uofi.box.com/shared/static/qbulp1alujgwxzkzdd2pj9jcxmno6e3v.png)
+
+**Answer:**
+```{r}
+library(tidyverse)
+rent <- readr::read_csv("https://uofi.box.com/shared/static/1mi85x78tljopsjv36ap9bwcpqwi9rlv.txt") 
+str(rent)
+
+```
+```{r}
+library(readr)
+X1mi85x78tljopsjv36ap9bwcpqwi9rlv <- read_csv("https://uofi.box.com/shared/static/1mi85x78tljopsjv36ap9bwcpqwi9rlv.txt")
+View(X1mi85x78tljopsjv36ap9bwcpqwi9rlv)
+```
+
+
+**#5** (Accessing and importing data via web scraping, Markdown) Select all of the following properties that were sold within the last 5 years:
+
+a. 922117132002
+
+b. 922116306002
+
+c. 912108352008
+
+d. 922116108008
+
+e. 912107280008
+
+Web scrape the Champaign County Assessor's [website](https://champaignil.devnetwedge.com/) for these properties and print results to show evidence of your answer.
+
+**Answer:**
+
+```{r prob5}
+prop_url <- paste0("https://champaignil.devnetwedge.com/",rental_data$`Parcel Number`,"/2021")
+
+owners_addresses <- rep(0, length(prop_url))
+
+
+
+head(owners_addresses)
+```

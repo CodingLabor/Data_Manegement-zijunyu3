@@ -1,0 +1,84 @@
+# STAT 440 Statistical Data Management - Spring 2022
+## Week08 Lab02 Section 01 Mon
+### Both .Rmd and .html files must be submitted by the end of class plus a 10 minute grace period. Any lab submitted after that 10 minute grace period will be deducted 2 points for being late. Labs submitted after the lab solution is posted will not be accepted; resulting in a 0 for that driver's lab.
+#### Only the driver should submit this assignment into their individual student repo. Save the filename as lab02-week08-section01-mon-netID.Rmd and render this file to .html. 
+
+
+**#1** This problem includes concepts from the following notes: Accessing and importing data. 
+
+**Problem:** Using Markdown syntax, make a numbered list with the first and last names of everyone at your station. Your netID should appear in all lowercase text.
+
+**Answer:zijunyu3**
+1.Iris Zhan
+2.Helena Gao
+3.Rosin Gu
+4.John Tang
+
+**#2** This problem includes concepts from the following notes: Data expansion. 
+
+**Problem:** If the statement below is TRUE, then write TRUE in the **Answer** section and provide evidence (code and results) of your answer. If the statement below is FALSE, then write FALSE in the **Answer** section and provide evidence (code and results) to the contrary.
+
+- Statement: Using the tidyverse `transmute` function allows the user to add a new column to an existing dataset and keep the new column and its existing columns.
+
+**Answer:False** 
+
+```{r prob2}
+library(tidyverse)
+library(readr)
+Jail <- read_csv("https://uofi.box.com/shared/static/b6kuknulot4bqyo7elc8gmm6qzhnk766.dat")
+transmute(Jail,First = First_name)
+```
+
+**#3** This problem includes concepts from the following notes: Accessing and importing data.
+
+**Problem:** Import the Champaign County Sheriff Office & Jail Data and its data URL https://uofi.box.com/shared/static/b6kuknulot4bqyo7elc8gmm6qzhnk766.dat and print the resulting first 10 rows.
+
+- Data description for Champaign County Sheriff Office & Jail Data: The dataset contains 11082 observations and 40 columns for individuals who were booked into jail in Champaign County Jail. The individuals are identifiable based on personal identity, and they are given unique jacket numbers. Some rows in the data appear more than once because of multiple crimes being assigned to one person. But there is also the possibility of there being recidivists. A recidivist is a person who goes to jail repeatedly (more than one datetime). The demographics of the people, reasons for being booked, and crime code are also given in the data. The original source is the Champaign County Sheriff Office & Jail (CCSO).
+
+**Answer:**
+
+```{r prob3}
+library(readr)
+Jail <- read_csv("https://uofi.box.com/shared/static/b6kuknulot4bqyo7elc8gmm6qzhnk766.dat")
+head(Jail,10)
+```
+
+**#4** This problem includes concepts from the following notes: Accessing and importing data, Arranging data, Data reduction, Data expansion, Vectorization, Regular expression and string manipulation, Summarizing data, Markdown.
+
+**Problem:** Beginning with the data imported in **Problem 3**, answer the following question in complete sentence(s) using Markdown syntax and showing code and results as evidence of your answer.
+
+- How many recidivists had a change in employment status?
+
+**Answer:441 recidivists** 
+
+```{r prob4}
+jail2 <- Jail %>%
+  select(booking_number,booking_date, jacket_number,`age arrest`, race, sex,`employment_status`) %>% #keep these columns
+  mutate(newid=paste(booking_number,jacket_number)) %>% #make new column that concatenates booking_number and jacket_number because we know jacket_number is a unique ID but if a person appears more than once we need another ID column to distinguish between those repeating jacket_numbers
+  distinct(newid, .keep_all = TRUE) %>%
+  # keep unique jacket_numbers based on newid with respect to all columns
+  count(jacket_number) %>% #count unique jacket_numbers only
+  filter(n>1) 
+  
+Jail %>%
+  filter(jacket_number %in% jail2$jacket_number)%>%
+  count(jacket_number,employment_status) %>%
+  count(jacket_number) %>%
+  filter(n>1)
+
+```
+
+**#5** This problem includes concepts from the following notes: Accessing and importing data, Arranging data, Data reduction, Data expansion, Vectorization, Regular expressions and string manipulation, Summarizing data, Validating data, Markdown.
+
+**Problem:** Use one validating data strategy to ensure that your answer to **Problem 4** is accurate. Hint: There are more than 900 recidivists but fewer than 1000.
+
+**Answer:The result of nrow is equal to number of rows in problem 4** 
+
+```{r prob5}
+jail3 <- Jail %>%
+  filter(jacket_number %in% jail2$jacket_number) %>% ##keep jacket_numbers that exist in jail2
+  count(jacket_number,employment_status) %>% #count the jacket_numbers
+  count(jacket_number)%>%
+  filter(n==1) 
+nrow(jail2) - nrow(jail3)
+```

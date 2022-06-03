@@ -1,0 +1,491 @@
+---
+title: "STAT 440 Statistical Data Management - Spring 2022"
+output: html_document
+runtime: shiny
+---
+
+## Final Exam 
+### Due: Tuesday May 10, 2022 11:59 pm US Central Time
+#### Created by Christopher Kinson
+
+Grading Rubric (per question):  
+2 points if complete and correct  
+1 point if incomplete or incorrect  
+0 points if no attempt made  
+
+
+**Retrieving your work**
+
+This exam .Rmd file is written in Markdown. The .Rmd file can be rendered as an .html file for easier viewing and has been created to do so based on the YAML header at the top of this document. This and all future exams are located in the **exams** directory within the **stat440-sp22-course-content** repo, i.e. **stat440-sp22-course-content/exams** in GitHub. It is always recommended that you **pull** (or refresh) the **stat440-sp22-course-content** repo to ensure that you have the most updated version of all course content including the exam(s). After pulling (or refreshing) the **stat440-sp22-course-content** repo, the final exam file will be in the exams directory. Once you have opened the .Rmd file, you may begin writing your answers beneath each problem in the **Answer** section. Do not remove any of the original problems (nor top matter) from the file, because that makes it more difficult for the course staff to grade your assignment. 
+
+**Submitting your work**
+
+In your individual student repo (named as your netID), you are to submit ***two*** files:
+
+a. Your reproducible document file (.Rmd) which should be saved as final-exam-netID.Rmd. For example, my exam file would be saved as final-exam-kinson2.Rmd.
+
+b. Your rendered reproducible document file (.html) which should be saved as final-exam-netID.html. For example, my exam file would be saved as final-exam-kinson2.html.
+
+**Do not place your files in a sub-directory (or folder).** You have an unlimited number of submissions, but only the latest proper submission (commit and push) will be viewed and graded. **Remember the .Rmd file needs to render properly to .html before submitting.** 
+
+
+***
+
+### All students are expected to complete all problems.
+
+### The following problems should be completed by you as an individual. If any problem asks you a particular question, be sure to answer it completely (with code, written sentences, or both). Written sentences should not appear in code chunks or code cells. Written sentences should appear in Markdown syntax unless specifically stated otherwise.
+
+### Do not change anything in this file above the double line. Doing so will prevent your exam from being graded.
+
+***
+***
+
+### Use the URLs to access the data (unless specified otherwise). No local files allowed. When a problem specifies to use SQL or SQL data management concepts, then SQL is required. Otherwise SQL is not required.
+
+### Late submissions will not be accepted. Thus, a late submission of the final exam will result in a score of 0.
+
+**#1** 
+
+**Problem:** Using Markdown syntax, make a numbered list with your first and last name in normal text as the first item. As the second item, write your NetID in all lower case letters.
+
+**Answer:**
+
+1. Zijun Yu
+2. zijunyu3
+
+
+***
+
+**#2** 
+
+**Problem:** Using Markdown syntax and at least two complete sentences, answer the following question(s).
+
+**Question:** what was your most memorable moment being in this class this semester? If there were none, why do you think that is?
+
+**Answer:My most memorable moment in this class is that Dr.Kinson gave students options about having party or extra credits. It is interesting that most students choose the extra credits rather than the party. I am glad that most students in this class prefer grades over having fun.** 
+
+
+***
+
+**#3** 
+
+**Problem:** Typically, the amount of study time outside of class needed to do well on lab assignments is:
+
+i. Much more time than I thought  
+ii. Somewhat more time than I thought
+iii. Just enough time  
+iv. Somewhat less time than I thought  
+v. Much less time than I thought  
+
+**Answer:iii**
+
+
+***
+
+**#4** 
+
+**Problem:** Using Markdown syntax and at least two complete sentences, answer the following question(s).
+
+**Question:** Would you take another course with this instructor? Explain your answer.
+
+**Answer:I would absolutely take another course with Dr.Kinson, I appreciate that Dr.Kinson always give extra credits and extended deadline of homework. He totally understands the difficulty of students.** 
+
+
+***
+
+**#5** 
+
+**Problem:** If the statement below is TRUE, then write TRUE in the **Answer** section. If the statement below is FALSE, then write FALSE.
+
+- Statement: Structured data is considered to be only human readable text without delimiters to separate fields, and observations. 
+
+**Answer:FALSE**
+
+
+***
+
+**#6** 
+
+**Problem:** If the statement below is TRUE, then write TRUE in the **Answer** section and provide evidence (both code and results) of your answer. If the statement below is FALSE, then write FALSE in the **Answer** section and provide evidence (both code and results) to the contrary. **Your code and results as evidence must be for the iris dataset only (accessible internally to R using the code `iris`). Your result must be limited to 10 rows.**
+
+- Statement: R's `ifelse` function is vectorized. 
+
+**Answer:TRUE**
+
+
+```{r}
+attach(iris)
+library(tidyverse)
+iris2 <- iris %>%
+  mutate(Sepal.Length5 = ifelse(`Sepal.Length`<5.0,1,0))
+head(iris2,n=10)
+```
+
+
+***
+
+**#7** 
+
+**Problem:** If the statement below is TRUE, then write TRUE in the **Answer** section and provide evidence (both code and results) of your answer. If the statement below is FALSE, then write FALSE in the **Answer** section and provide evidence (both code and results) to the contrary. **Your code and results as evidence must be for the iris dataset only (accessible internally to R using the code `iris`). Your result must be limited to 10 rows.**
+
+- Statement: In SQL, the `SELECT` clause can be used to add new columns based on existing columns.
+
+**Answer:TRUE** 
+
+```{r}
+library(sqldf)
+iris3 <- sqldf("SELECT *,`Petal.Length`*`Petal.Width` AS `Petal.Square`
+               FROM iris")
+head(iris3,n=10)
+```
+
+
+***
+
+**#8** 
+
+**Problem:** If the statement below is TRUE, then write TRUE in the **Answer** section and provide evidence (both code and results) of your answer. If the statement below is FALSE, then write FALSE in the **Answer** section and provide evidence (both code and results) to the contrary. **Your code and results as evidence must be for the iris dataset only (accessible internally to R using the code `iris`). Your result must be limited to 10 rows.**
+
+- Statement: In SQL, subqueries are only allowed in the `FROM` clause.
+
+**Answer:** 
+```{r}
+iris4 <- sqldf("SELECT `Petal.Length`,`Petal.Width`,Species
+               FROM iris
+               WHERE Species == 'versicolor'
+               ")
+head(iris4,n=10)
+```
+
+
+
+***
+
+**#9** 
+
+**Problem:** If the statement below is TRUE, then write TRUE in the **Answer** section and provide evidence (both code and results) of your answer. If the statement below is FALSE, then write FALSE in the **Answer** section and provide evidence (both code and results) to the contrary. **Your code and results as evidence must be for the iris dataset only (accessible internally to R using the code `iris`). If a printout of data is included in your result, then the data printout must be limited to 10 rows.**
+
+- Statement: In R's shiny app, it is impossible to use 1 single input to react with more than 1 output.
+
+**Answer:FALSE**
+
+```{r}
+library(shiny)
+library(ggplot2)
+ui <- fluidPage(
+  navlistPanel(
+    
+    tabPanel("SliderInput",
+             selectInput("selectcol", "Choose a color for plotting",
+                         choice = colors(),selected="pink")
+    ),  #the comma is important
+    tabPanel("SepalPlotOutput",
+             # Show a plot of the generated distribution
+             plotOutput("distPlot")
+    ),
+    tabPanel("PetalPlotOutput",
+             # Show a plot of the generated distribution
+             plotOutput("distPlot2")
+    )
+  )
+  
+)
+
+server <- function(input, output) {
+  output$distPlot <- renderPlot({
+    # generate bins based on input$bins from ui.R
+    ggplot(data=iris,mapping=aes(x=Sepal.Length,y=Sepal.Width)) + geom_point(colour=input$selectcol,size=5)
+    
+  })
+  
+  output$distPlot2 <- renderPlot({
+    ggplot(data=iris,mapping=aes(x=Petal.Length,y=Petal.Width)) + geom_point(colour=input$selectcol,size=5)
+    
+  })
+  
+  
+}
+
+shinyApp(ui = ui, server = server)
+```
+
+
+
+***
+
+**#10** 
+
+**Problem:** If the statement below is TRUE, then write TRUE in the **Answer** section and provide evidence (both code and results) of your answer. If the statement below is FALSE, then write FALSE in the **Answer** section and provide evidence (both code and results) to the contrary. **Your code and results as evidence must be for the iris dataset only (accessible internally to R using the code `iris`). If a printout of data is included in your result, then the data printout must be limited to 10 rows.**
+
+- Statement: In R's shiny app, it is possible to use 2 or more inputs to react with only 1 output.
+
+**Answer:TRUE** 
+
+```{r}
+library(shiny)
+library(ggplot2)
+ui <- fluidPage(
+  navlistPanel(
+    
+    tabPanel("SliderInput",
+             selectInput("selectcol1", "Choose a color for plotting",
+                         choice = colors(),selected="pink"),
+             selectInput("selectcol2", "Choose a color for linear smooth color",
+                         choice = colors(),selected="pink")
+    ),  #the comma is important
+    tabPanel("SepalPlotOutput",
+             # Show a plot of the generated distribution
+             plotOutput("distPlot")
+    )
+  )
+  
+)
+
+server <- function(input, output) {
+  output$distPlot <- renderPlot({
+    # generate bins based on input$bins from ui.R
+    ggplot(data=iris,mapping=aes(x=Sepal.Length,y=Sepal.Width)) + geom_point(colour=input$selectcol1,size=5)+geom_smooth(method=lm,colour=input$selectcol2)
+    
+  })
+  
+  
+}
+
+shinyApp(ui = ui, server = server)
+```
+
+
+
+***
+
+**#11**  
+
+**Problem:** Import the both Popular Baby Names in US Data using [its data URL](https://uofi.box.com/shared/static/gryxqx9yw2u3svm7veucc2zsvsulvom8.csv) and the US Natality Data using [its data URL](https://uofi.box.com/shared/static/rwuzqtmngs2u5odo723y1dcttn08a6s2.csv) and print the first 10 rows of each dataset. This structure should match the Data Descriptions below. More information about each dataset can be found in the respective Data Key. **The `read.csv()` function is not allowed in this problem.**
+
+- Data Key for Popular Baby Names in US Data: https://www.ssa.gov/oact/babynames/background.html
+
+- Data Description for Popular Baby Names in US Data: The dataset (a .csv file) contains 658127 rows and 4 columns. The data is a combination of popular baby names by gender, frequency, and year from 2001 to 2020 in the US. The baby names come from Social Security records. Soon after a child is born in the US, the parent(s) file for a Social Security card. This data does not include baby names with frequencies less than 5. The original source is the Social Security Administration https://www.ssa.gov/oact/babynames/limits.html.
+
+- Data Key for US Natality Data: https://uofi.box.com/shared/static/smkvjba0wcppzpayymnc19lj8kpozx7g.pdf
+
+- Data Description for US Natality Data: The dataset (a .csv file) contains a random sample of 10000 US birth records from the year 2015. There are 241 columns containing information about the mother, father, and child such as health outcomes of the newborn baby, demographics of the parents, health metrics of the mother, etc. The original source is Centers for Disease Control and Prevention's National Center for Health Statistics.
+
+**Answer:**
+
+```{r}
+library(data.table)
+babyname <- fread("https://uofi.box.com/shared/static/gryxqx9yw2u3svm7veucc2zsvsulvom8.csv")
+head(babyname,n=10)
+```
+```{r}
+library(data.table)
+natali <- fread("https://uofi.box.com/shared/static/rwuzqtmngs2u5odo723y1dcttn08a6s2.csv")
+head(natali,n=10)
+```
+
+
+
+***
+
+**#12** 
+
+**Problem:** Using the Popular Baby Names in US Data imported in **Problem 11**, perform any data management concepts to answer the following question. Your answer to the question should be written in a complete sentence(s) (in the **Answer** section) and must include executable code with a printed result as evidence of your answer.
+
+**Question:** The Instructor's daughter's name is Xena. Which year is that name the most frequently occurring and what is that frequency?
+
+**Answer:2020 is the year that Xena most frequently occerring, and the frequency is 211.**
+
+```{r}
+babyname2 <- babyname %>%
+  filter(name == "Xena") %>%
+  arrange(desc(freq))
+
+head(babyname2,n=10)
+
+```
+
+
+
+***
+
+**#13** 
+
+**Problem:** Using the Popular Baby Names in US Data imported in **Problem 11**, perform any SQL data management concepts to answer the following question. Your answer to the question should be written in a complete sentence(s) (in the **Answer** section) and must include executable SQL code with a printed result as evidence of your answer.
+
+**Question:** The Instructor's son's name is Obsidian. Which year is that name the most frequently occurring and what is that frequency?
+
+**Answer:2020 is the year that Obsidian most frequently occurring, and the frequency is 12.**
+```{r}
+babyname3 <- babyname %>%
+  filter(name == "Obsidian") %>%
+  arrange(desc(freq))
+
+head(babyname3,n=10)
+```
+
+
+
+***
+
+**#14** 
+
+**Problem:** Create a subset of the Popular Baby Names in US Data imported in **Problem 11** that only includes baby names within the range "We" - "Za" (where the endpoints are inclusive). Now, print a random sample of 10 rows from this subset. There should be 4 columns in the result. **"We" means names with "W" as the first letter and "e" as the second letter, such as "Weston". "Za" means names with "Z" as the first letter and "a" as the second letter. The range "We" - "Za" includes names such as "Weston", "Xiang", "Yury", and "Zavion." The range "We" - "Za" excludes names like "Wdando" and "Zbinee". The result must be random without setting any initial seed value and without specifying a random number generation state.**
+
+**Answer:**
+
+```{r}
+whay = str_split(babyname$name,"",simplify=TRUE)
+babynameW <- babyname %>%
+  filter(!startsWith(name,"Wa")) %>%
+  filter(!startsWith(name,"Wb")) %>%
+  filter(!startsWith(name,"Wc")) %>%
+  filter(startsWith(name,'W'))
+  
+
+
+babynameY <- babyname %>%
+  filter(startsWith(name,'Y'))
+
+babynameX <- babyname %>%
+  filter(startsWith(name,'X'))
+
+babynameZ <- babyname %>%
+  filter(startsWith(name,'Za'))
+
+babynamefinal = rbind(babynameW,babynameX,babynameY,babynameZ)
+
+
+babynamefinal %>%
+  arrange(name)%>%
+  sample_n(10)
+
+
+```
+
+
+
+***
+
+**#15** 
+
+**Problem:** Using the Popular Baby Names in US Data imported in **Problem 11**, create a new tibble (not a data frame) named "a_names" that does the following items (in this order):
+
+- filters the observations such that the names begin with the letter "A" and the year equals 2001
+
+- mutates a new column called "len" which equals the number of letters in each baby name
+
+- mutates a new column called "overall_rank" which assigns the number 1 to the name with the highest frequency regardless of sex; **if there is a tie in frequency, then the name with the smallest "len" receives a lower number in the "overall_rank" column; if there is a tie in "len" then the name beginning with the earliest letter in the alphabet receives a lower number in the overall_rank" column; for example, if Chris, Kris, and Cris are tied in frequency, then the overall_rank" number in parentheses among these three names would be Cris (1), Kris (2), Chris (3).**
+
+- arranges the data by "overall_rank" in ascending order
+
+Now, print the first 10 observations of the "a_names" data set.
+
+**Answer:**
+
+```{r}
+a_names <- babyname %>%
+  filter(year == 2001, startsWith(name,"A"))%>%
+  mutate(len = str_length(name))%>%
+  arrange(freq,len,name) %>%
+  mutate(overall_rank = row_number())
+
+head(a_names,10)
+
+```
+
+
+
+***
+
+**#16** 
+
+**Problem:** Using the Popular Baby Names in US Data imported in **Problem 11**, perform any data management concepts to answer the following question. Your answer to the question should be written in a complete sentence(s) (in the **Answer** section) and must include executable code with a printed result as evidence of your answer.
+
+**Question:** Which vowel of the alphabet is the most commonly used among all names in the year 2020? Which consonant of the alphabet is the most commonly used among all names in the year 2020?
+
+**Answer:"a" is the most commonly used vowel of the alphabet among all names in the year 2020,"n" is the most commonly used consonant of the alphabet  among all names in the year 2020. ** 
+
+```{r}
+babyname2020 <- babyname %>%
+  filter(year == 2020)
+common_al <- sort(table(str_to_lower(unlist(str_split(babyname2020$name, "")))),decreasing = TRUE)
+common_al
+
+```
+
+
+
+***
+
+**#17** 
+
+**Problem:** Using the US Natality Data imported in **Problem 11**, perform any data management concepts to answer the following question. Your answer to the question should be written in a complete sentence(s) (in the **Answer** section) and must include executable code with a printed result as evidence of your answer.
+
+**Question:** How many columns have at least two missing values? In this problem, missing values means `NA` only.
+
+**Answer:108 columns have at least two missing values** 
+
+```{r}
+length(which(colSums(is.na(natali)) >= 2))
+```
+
+
+
+***
+
+**#18** 
+
+**Problem:** Using the US Natality Data imported in **Problem 11**, perform any data management concepts to answer the following question. Your answer to the question should be written in a complete sentence(s) (in the **Answer** section) and must include executable code with a printed result as evidence of your answer.
+
+**Question:** Are short women or tall women (height measured in centimeters) represented more in the data? Short is defined as at or below the 33th percentile in height (in centimeters). Tall is defined as at or above the 67th percentile in height (in centimeters). A $k-th$ percentile is a score at or below which a given percentage of a distribution $k$ falls.
+
+**Answer:Tall women represented more in the data, as 4375 is more than 4005** 
+
+```{r}
+natalidrop <- natali%>%
+  drop_na(M_HT_IN)
+
+quantile(natalidrop$M_HT_IN,c(0.33,0.67))
+
+
+```
+```{r}
+length(which(natalidrop$M_HT_IN <= 63))
+```
+```{r}
+length(which(natalidrop$M_HT_IN >= 65))
+```
+
+
+
+***
+
+**#19** 
+
+**Problem:** Using the US Natality Data imported in **Problem 11**, create a table or tibble that shows the 5 names of the final route and method of delivery and their corresponding proportions (not counts).
+
+**Answer:**
+
+```{r}
+natalirout <- natali %>%
+  mutate(ME_ROUT = replace(ME_ROUT, ME_ROUT == 1, "Spontaneous")) %>%
+  mutate(ME_ROUT = replace(ME_ROUT, ME_ROUT == 2, "Forceps")) %>%
+  mutate(ME_ROUT = replace(ME_ROUT, ME_ROUT == 3, "Vacuum")) %>%
+  mutate(ME_ROUT = replace(ME_ROUT, ME_ROUT == 4, "Cesarean")) %>%
+  mutate(ME_ROUT = replace(ME_ROUT, ME_ROUT == 9, "Unknown or not stated"))
+
+
+sort(table(natalirout$ME_ROUT)/nrow(natalirout),decreasing = TRUE)
+```
+
+
+
+***
+
+**#20** 
+
+**Problem:** Using Markdown syntax, answer the following question(s).
+
+**Question:** This course incorporated a pedagogical style that combined active learning, paired programming, and community-covered-learning taught in a flexible classroom. Did you like this pedagogical style? Yes or No.
+
+**Answer:Yes, I really like this pedagogical style!** 

@@ -1,0 +1,121 @@
+# STAT 440 Statistical Data Management - Spring 2022
+## Week14 Lab03 Section 01 Mon
+### Both .Rmd and .html files must be submitted by the end of class plus a 10 minute grace period. Any lab submitted after that 10 minute grace period will be deducted 2 points for being late. Labs submitted after the lab solution is posted will not be accepted; resulting in a 0 for that driver's lab.
+#### Only the driver should submit this assignment into their individual student repo. Save the filename as lab01-week14-section01-mon-netID.Rmd and render this file to .html. 
+
+
+**#1** This problem includes concepts from the following notes: Markdown. 
+
+**Problem:** Using Markdown syntax, make a numbered list with the first and last names of everyone at your station. Your netID should appear in all lowercase text.
+
+**Answer:**
+
+1. Zijun Yu  zijunyu3
+2. Edith Yao
+3. Sam Keck
+4. Carson Rohder
+
+**#2** This problem includes concepts from the following notes/videos: Shiny apps and dashboards, Markdown. 
+
+**Problem:** If the statement below is TRUE, then write TRUE in the **Answer** section and provide evidence (code and results) that it is TRUE. If the statement below is FALSE, then write FALSE in the **Answer** section and provide evidence (code and results) that it is FALSE.
+
+- Statement: The `function()` function can be used to create a new user-defined function.
+
+**Answer:TRUE,R allows users to create their own functions (i.e. user-defined functions) AKA tools using the function().** 
+
+```{r}
+exc <- function(n,rho){
+  mat <- array(rho,dim=c(n,n))
+  mat2 <- array(c(1:n,1:n),dim=c(n,2))
+  mat[mat2] <- 1 
+  mat
+}
+exc(5,0.5)
+```
+
+
+**#3** This problem includes concepts from the following notes: Accessing and importing data, SQL for weeks 03-07 content, SQL sub-queries.
+
+**Problem:** Import the Chicago 311 Service Requests for Abandoned Vehicles Data using its URL https://uofi.box.com/shared/static/526squ7ue3j2ugmjqp280ti0lwh68w10.csv and print the resulting last 10 rows. **SQL not required.**
+
+Data description for Chicago 311 Service Requests for Abandoned Vehicles Data: The dataset contains 261486 observations and 14 columns. The subjects are reports of abandoned vehicles around Chicago such that those reports are made to Chicago's 311 service. A vehicle can be classified as abandoned if it meets one or more of the following criteria: 1) On a public way in a state of disrepair as to be incapable of being driven in its present condition. 2) Has not been moved or used for more than seven consecutive days and is apparently deserted. 3) Has been left on the public way without state registration or a temporary state registration placard for two or more days. 4) Is a hazardous dilapidated vehicle left in full view of the general public, whether on public or private property. Requests that have been labeled as Duplicates are in the same geographic area and have been entered into 311 Customer Service Requests (CSR) system at around the same time as a previous request. Duplicate reports/requests are labeled as such in the Status field, as either "Open - Dup" or "Completed - Dup." Original source is City of Chicago.
+
+**Answer:**
+
+```{r}
+library(readr)
+chicago <- read_csv("https://uofi.box.com/shared/static/526squ7ue3j2ugmjqp280ti0lwh68w10.csv", 
+    col_types = cols(`Creation Date` = col_date(format = "%m-%d-%Y"), 
+        `Completion Date` = col_date(format = "%m-%d-%Y")))
+
+tail(chicago)
+```
+
+
+**#4** This problem includes concepts from the following notes/videos: Arranging data, Data reduction, Data expansion, Vectorization, Regular expressions and string manipulation, Summarizing data, Combining data, SQL for weeks 03-07 content, SQL sub-queries, Tool-making and programming Part01, Data visualization using base R, Data visualization using Tidyverse.
+
+**Problem:** Create a map style data visualization that plots the locations of these 311 service requests as a scatter plot. The points should be colored green if the request took less time than average to complete (measured in days).
+
+**Answer:**
+
+```{r}
+library(tidyverse)
+Coordinates00 <- str_remove_all(chicago$Location, "\\)|\\,|\\(")
+Coordinates000 <- str_split(Coordinates00, " ", simplify = TRUE)
+chicago1 <- chicago %>%
+  mutate(Latitude=Coordinates000[,1])%>%
+  mutate(Longitude=Coordinates000[,2])%>%
+  mutate(diff = difftime(`Completion Date`,`Creation Date`,unit="days")) %>%
+  mutate(average = mean(`Completion Date` - `Creation Date`,na.rm=TRUE)) %>%
+  mutate(less = ifelse(`Completion Date` - `Creation Date` < average,"green", ifelse(`Completion Date` - `Creation Date` >average,"red","")))
+
+
+  
+  
+```
+```{r}
+
+
+
+plot(chicago1$Latitude,
+     chicago1$Longitude,
+     pch=19,
+     col=chicago1$less,
+     xlab="Latitude",
+     ylab="Longitude",
+     frame.plot = FALSE,
+     axes=FALSE)
+library(gridGraphics)
+fun_grob <- function(){                        # Create user-defined function
+  grid.echo()
+  grid.grab()
+}
+fun_grob_out <- fun_grob()
+grid.newpage()                                 # Create new plot page
+pushViewport(viewport(angle = 270))
+grid.draw(fun_grob_out)
+
+```
+
+
+**#5** This problem includes concepts from the following notes/videos: Arranging data, Data reduction, Data expansion, Vectorization, Regular expressions and string manipulation, Summarizing data, Combining data, SQL for weeks 03-07 content, SQL sub-queries, Tool-making and programming Part01.
+
+**Problem:** Among the service requests with fewer than average differences in creation date and completion date (measured in days), which Community Area Number is associated with the most 311 service requests for abandoned vehicles? Write your answer in Markdown syntax with complete sentence(s) and show SQL code and result as evidence.
+
+**Answer:Among the service requests with fewer than average differences in creation date and completion date (measured in days), Community Area 25 is associated with the most 311 service requests for abandoned vehicles.** 
+
+```{r}
+library(sqldf)
+chicago1$diff <- as.numeric(chicago1$diff)
+chicago1$average <- as.numeric(chicago1$average)
+chicago2 <- sqldf("SELECT * FROM chicago1
+                  WHERE diff <= average")
+chicago3 <- sqldf("SELECT `Community Area`, COUNT(`Community Area`) AS N 
+                  FROM chicago2
+                  GROUP BY `Community Area`
+                  ORDER BY N DESC
+                  LIMIT 5
+                  ")
+chicago3
+```
+
