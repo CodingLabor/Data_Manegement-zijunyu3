@@ -1,0 +1,96 @@
+# STAT 440 Statistical Data Management - Spring 2022
+## Week15 Lab03 Section 02 Mon
+### Both .Rmd and .html files must be submitted by the end of class plus a 10 minute grace period. Any lab submitted after that 10 minute grace period will be deducted 2 points for being late. Labs submitted after the lab solution is posted will not be accepted; resulting in a 0 for that driver's lab.
+#### Only the driver should submit this assignment into their individual student repo. Save the filename as lab03-week15-section02-mon-netID.Rmd and render this file to .html. 
+
+
+**#1** This problem includes concepts from the following notes: Markdown. 
+
+**Problem:** Using Markdown syntax, make a numbered list with the netIDs of everyone at your station in lowercase text. Your netID should appear in bold.
+
+**Answer:** Answers will vary. A numbered list includes numbers followed by period. Sample below.
+
+1. drivernetid
+
+2. passengernetid
+
+**#2** This problem includes concepts from the following notes: Accessing and importing data.
+
+**Problem:** Import the Rental Inspection Grades Listing Data using its data URL https://uofi.box.com/shared/static/lbqe1l9a2g5lr0twk6zcwajasybekget.json and print the resulting first 10 rows. The data description (included below) may be helpful.  
+
+Data description for Rental Inspection Grades Listing Data: The dataset (a .json file) contains the 1738 rental properties in Urbana with 7 variables ("columns") per property which includes details about the parcel number, address, grade, inspection date, and more. The rental properties are inspected on a rotating basis and can receive a letter grade of A, B, C, D, F, and N. The best grade is A. The original source is the City of Urbana.
+
+**Answer:**
+
+```{r}
+library(tidyverse)
+library(jsonlite)
+library(sqldf)
+rentals <- fromJSON("https://uofi.box.com/shared/static/lbqe1l9a2g5lr0twk6zcwajasybekget.json")
+slice_head(rentals, n=10)
+```
+
+**#3** This problem includes concepts from the following notes/videos: Arranging data, Data reduction, Data expansion, Vectorization, Regular expressions and string manipulation, Summarizing data, Combining data, SQL for weeks 03-07 content, SQL sub-queries, Tool-making and programming Part01.
+
+**Problem:** Combine the following data about the owners of the rental properties using its data URL https://uofi.box.com/shared/static/7m2hlut865herv9zzgzvyl4ort0j7rhr.csv such that the combined data has the original 7 columns from the Rentals Data and 4 new columns: `Owner Name`, `Owner Address`, `Owner City`, and `Owner State`. Now print the last 5 columns of the new data and the following rows: 57, 120, 628, 713, 1462. **You do not have to correct any incorrectly assigned owner names, addresses, cities, or states.**
+
+**Answer:**
+
+```{r}
+owners_addresses <- read_csv("https://uofi.box.com/shared/static/7m2hlut865herv9zzgzvyl4ort0j7rhr.csv")
+
+own2<-str_split(owners_addresses$name, "\\\n", simplify=TRUE)
+own3<-str_split(own2[,3], "\\,\\s", simplify = TRUE)
+own4<-str_split(own2[,4], "\\,\\s", simplify=TRUE)
+
+rentals2 <- bind_cols(rentals,owners_addresses) %>%
+  mutate(`Owner Name` = own2[,1], `Owner Address` = own2[,2], `Owner City` = own3[,1], `Owner State` = own3[,2]) %>%
+  select(-name)
+
+rentals2 %>% 
+  select(`Expiration Date`:`Owner State`) %>%
+  slice(57, 120, 628, 713, 1462)
+```
+
+**#4** This problem includes concepts from the following notes/videos: Arranging data, Data reduction, Data expansion, Vectorization, Regular expressions and string manipulation, Summarizing data, Combining data, Data validating and cleaning, SQL for weeks 03-07 content, SQL sub-queries, Tool-making and programming Part01.
+
+**Problem:** The combined data in the previous problem contains several incorrectly assigned owner names, addresses, cities, and states. **There are roughly 190 rows with incorrect values.** Validate and clean those incorrect values. Now print the last 5 columns of the newly cleaned data and the following rows: 57, 120, 628, 713, 1462.
+
+**Answer:**
+
+```{r}
+x=ifelse(!str_detect(rentals2$`Owner Address`, "\\d"), paste(rentals2$`Owner Name`,"&",rentals2$`Owner Address`), rentals2$`Owner Name`)
+
+xx=ifelse(!str_detect(rentals2$`Owner Address`, "\\d"), rentals2$`Owner City`, rentals2$`Owner Address`)
+#sum(str_detect(xx, "\\d"))
+xx2=ifelse(str_detect(xx, "^SERIES"), own3[,1], xx)
+
+i1=which(!str_detect(xx, "^\\d"))
+i2=which(!str_detect(xx[i1], "^PO"))
+#xx[i1[i2]]
+j1=which(!str_detect(xx2, "^\\d"))
+j2=which(!str_detect(xx2[j1], "^PO"))
+#j2
+#xx2[j1[j2]]
+
+#which(!str_detect(rentals2$`Owner State`, "\\w\\w")|str_detect(rentals2$`Owner State`, "\\d"))
+xxx=ifelse(!str_detect(rentals2$`Owner State`, "\\w\\w")|str_detect(rentals2$`Owner State`, "\\d"), own4[,1], rentals2$`Owner City`)
+#table(xxx)
+
+xxxx=ifelse(!str_detect(rentals2$`Owner State`, "\\w\\w")|str_detect(rentals2$`Owner State`, "\\d"), own4[,2], rentals2$`Owner State`)
+#table(xxxx)
+#sum(str_detect(xxxx, "\\w\\w"))
+
+rentals3 <- rentals2 %>%
+  mutate(`Owner Name`= x, `Owner Address`= xx2, `Owner City`= xxx,`Owner State` = xxxx)
+
+rentals3 %>% 
+  select(`Expiration Date`:`Owner State`) %>%
+  slice(57, 120, 628, 713, 1462)
+```
+
+**#5** This problem includes concepts from the following notes/videos: Data workers and their responsibilities.
+
+**Problem:** Would you describe the skill and knowledge required to complete the above problems as those of a data engineer, data architect, or data dataist? Write your answer below in the **Answer**section following Markdown syntax.
+
+**Answer:** Data engineer

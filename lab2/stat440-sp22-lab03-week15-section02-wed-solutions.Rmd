@@ -1,0 +1,88 @@
+# STAT 440 Statistical Data Management - Spring 2022
+## Week15 Lab03 Section 02 Wed
+### Both .Rmd and .html files must be submitted by the end of class plus a 10 minute grace period. Any lab submitted after that 10 minute grace period will be deducted 2 points for being late. Labs submitted after the lab solution is posted will not be accepted; resulting in a 0 for that driver's lab.
+#### Only the driver should submit this assignment into their individual student repo. Save the filename as lab03-week15-section02-wed-netID.Rmd and render this file to .html. 
+
+
+**#1** This problem includes concepts from the following notes: Markdown. 
+
+**Problem:** Using Markdown syntax, make a numbered list with the netIDs of everyone at your station in lowercase text. Your netID should appear in bold.
+
+**Answer:** Answers will vary. A numbered list includes numbers followed by period. Sample below.
+
+1. drivernetid
+
+2. passengernetid
+
+**#2** This problem includes concepts from the following notes/videos: Shiny apps and dashboards, Markdown. 
+
+**Problem:** If the statement below is TRUE, then write TRUE in the **Answer** section and provide evidence (code and results) that it is TRUE. If the statement below is FALSE, then write FALSE in the **Answer** section and provide evidence (code and results) that it is FALSE.
+
+- Statement: Shiny's sliderInput does not allow for a starting value of the slider for the user.
+
+**Answer:** FALSE
+
+```{r}
+library(shiny)
+
+ui <- fluidPage(
+        sliderInput(inputId = "bins",
+                        label = "Number of bins:",
+                        min = 1,
+                        max = 50,
+                        value = 30),
+      plotOutput("distPlot")
+      )
+
+server <- function(input, output) {
+
+    output$distPlot <- renderPlot({
+      x    <- faithful[, 2]
+      bins <- seq(min(x), max(x), length.out = input$bins + 1)
+      hist(x, breaks = bins, col = 'darkgray', border = 'white',
+           main="Waiting time to next eruption (in minutes)")
+    })
+}
+
+shinyApp(ui = ui, server = server)
+```
+
+**#3** This problem includes concepts from the following notes: Accessing and importing data.
+
+**Problem:** Import the Rental Inspection Grades Listing with Property Owners Data using its data URL https://uofi.box.com/shared/static/dxyyqnpq3x7zbastvoh9c04njkxbri5h.csv and print the resulting first 10 rows. The data description (included below) may be helpful.  
+
+Data description for Rental Inspection Grades Listing Data: The dataset (a .json file) contains the 1738 rental properties in Urbana with 11 variables ("columns") per property which includes details about the parcel number, address, grade, inspection date, as well as property owner information. The rental properties are inspected on a rotating basis and can receive a letter grade of A, B, C, D, F, and N. The best grade is A. The original source is the City of Urbana and Champaign County Assessor.
+
+**Answer:**
+
+```{r}
+library(tidyverse)
+rentals <- read_csv("https://uofi.box.com/shared/static/dxyyqnpq3x7zbastvoh9c04njkxbri5h.csv")
+slice_head(rentals, n=10)
+```
+
+**#4** This problem includes concepts from the following notes/videos: Arranging data, Data reduction, Data expansion, Vectorization, Regular expressions and string manipulation, Summarizing data, Combining data, SQL for weeks 03-07 content, SQL sub-queries, Tool-making and programming Part01, Data workers and their responsibilities.
+
+**Problem:** The subjects or individuals in this dataset are personally identifiable and not anonymous, but this is a security concern for publishing purposes. Ideally, data that are released into the public do not contain easily identifiable subjects or individuals. Consider the information in the data and anonymize it to the best of your abilities. Anonymizing the data might mean removing personally identifiable information or masking the identifiable information such that it is not clear who the information is referring to.
+
+**Answer:** Answers will vary here but students must make effort to anonymize the data. One idea is to remove the names of the owners, replace owner names with ID numbers, and add noise to the parcel numbers.
+
+```{r}
+fgroup <- rentals$`Owner Name`
+rental_list <- lapply( split(rentals, fgroup), function(x){
+  x$OwnerID <- paste0(sample(100:999,1,replace = TRUE), sample(rep(LETTERS,100),1), sample(1000:9999,1))
+  return(x)})
+
+rentals2 <- do.call(rbind, rental_list)
+row.names(rentals2) <- NULL
+
+rentals2 %>%
+  mutate(PropertyNumber = `Parcel Number`+runif(nrow(rentals),min = 1000, max=9999) ) %>%
+  select(`Property Address`, PropertyNumber, `Inspection Date`, Grade, `License Status`, `Expiration Date`, OwnerID, `Owner City`, `Owner State`)
+```
+
+**#5** This problem includes concepts from the following notes/videos: Data workers and their responsibilities.
+
+**Problem:** Would you describe the skill and knowledge required to complete the above problems as those of a data engineer, data architect, or data dataist? Write your answer below in the **Answer**section following Markdown syntax.
+
+**Answer:** Data engineer

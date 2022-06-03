@@ -1,0 +1,81 @@
+---
+output: html_document
+runtime: shiny
+---
+# STAT 440 Statistical Data Management - Spring 2022
+## Week16 Lab03 Section 01 Mon
+### Both .Rmd and .html files must be submitted by the end of class plus a 10 minute grace period. Any lab submitted after that 10 minute grace period will be deducted 2 points for being late. Labs submitted after the lab solution is posted will not be accepted; resulting in a 0 for that driver's lab.
+#### Only the driver should submit this assignment into their individual student repo. Save the filename as lab03-week16-section01-mon-netID.Rmd and render this file to .html. 
+
+
+**#1** This problem includes concepts from the following notes: Markdown. 
+
+**Problem:** Using Markdown syntax, make a non-numbered list with the netIDs of everyone at your station in lowercase text. Your netID should appear in bold.
+
+**Answer:** Answers will vary. A non-numbered list doesn't include numbers followed by period. Sample below.
+
+- drivernetid
+
+- passengernetid
+
+**#2** This problem includes concepts from the following notes/videos: Shiny apps and dashboards, Markdown. 
+
+**Problem:** If the statement below is TRUE, then write TRUE in the **Answer** section and provide evidence (code and results) that it is TRUE. If the statement below is FALSE, then write FALSE in the **Answer** section and provide evidence (code and results) that it is FALSE.
+
+- Statement: Shiny's textInput does not allow for a starting value of the slider for the user.
+
+**Answer:** FALSE
+
+```{r}
+library(shiny)
+
+ui <- fluidPage(
+  textInput(inputId="caption", label="Caption", valu="An initial value"),
+  verbatimTextOutput("texts")
+)
+server <- function(input, output) {
+  output$texts <- renderText({ input$caption })
+}
+
+shinyApp(ui, server)
+
+```
+
+**#3** This problem includes concepts from the following notes: Accessing and importing data.
+
+**Problem:** Import the Champaign County Sheriff Office & Jail Data and its data URL https://uofi.box.com/shared/static/b6kuknulot4bqyo7elc8gmm6qzhnk766.dat and print the resulting structure of the data. **SQL not required.**
+
+- Data description for Champaign County Sheriff Office & Jail Data: The dataset contains 11082 observations and 40 columns for individuals who were booked into jail in Champaign County Jail. The individuals are identifiable based on personal identity, and they are given unique jacket numbers. Some rows in the data appear more than once because of multiple crimes being assigned to one person. But there is also the possibility of there being recidivists. A recidivist is a person who goes to jail repeatedly (more than one datetime). The demographics of the people, reasons for being booked, and crime code are also given in the data. The original source is the Champaign County Sheriff Office & Jail (CCSO).
+
+**Answer:**
+
+```{r prob3}
+library(tidyverse)
+jail <- read_csv("https://uofi.box.com/shared/static/b6kuknulot4bqyo7elc8gmm6qzhnk766.dat")
+str(jail)
+```
+
+**#4** This problem includes concepts from the following notes/videos: Arranging data, Data reduction, Data expansion, Vectorization, Regular expressions and string manipulation, Summarizing data, Combining data, SQL for weeks 03-07 content, SQL sub-queries, Tool-making and programming Part01, Data workers and their responsibilities.
+
+**Problem:** The subjects or individuals in this dataset are personally identifiable and not anonymous, but this is a security concern for publishing purposes. Ideally, data that are released into the public do not contain easily identifiable subjects or individuals. Consider the information in the data and a) generalize some of the information and/or b) add noise to some of the information to the best of your abilities. Generalizing the data and adding noise to the data might mean masking the identifiable information, replacing specific values for each person with general values such that it is not clear who the information is referring to.
+
+**Answer:** Answers will vary here but students must make effort to anonymize the data. One idea is to remove the names and original booking and jacket numbers replacing them with a new id number which is a combination of the two columns with some randomness (adding noise), and to add a column that records the total number of crimes per person with respect to their booking number (generalizing).
+
+```{r}
+anon_jail <- jail %>% 
+  mutate(newid = paste0(booking_number,jacket_number)) %>%
+  group_by(newid) %>%
+  mutate(total_crimes = n()) %>%
+  select(newid, race, sex, hours, state, total_crimes) %>%
+  distinct(newid, .keep_all = TRUE) %>%
+  mutate(newid = as.numeric(newid) + runif(1,1.0e15,9.999e18),
+         state=ifelse(state=="ILLINOIS","ILLINOIS","NOT ILLINOIS"))
+
+head(anon_jail,n=10)
+```
+
+**#5** This problem includes concepts from the following notes/videos: Data workers and their responsibilities.
+
+**Problem:** Would you describe the skill and knowledge required to complete the above problems as those of a data engineer, data architect, or data dataist? Write your answer below in the **Answer**section following Markdown syntax.
+
+**Answer:** Data engineer
