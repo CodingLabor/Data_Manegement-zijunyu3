@@ -1,0 +1,61 @@
+---
+title: "STAT 440 Statistical Data Management - Spring 2022"
+output: html_document
+---
+## Week 14 Notes
+### Created by Christopher Kinson
+
+
+***
+
+
+## Table of Contents
+
+- [Introduction to DevOps](#intro)  
+- [Recommended Reads](#recommended)  
+
+
+***
+
+## <a name="intro"></a>Introduction to DevOps
+
+
+Development operations of DevOps for short represents a set of procedures that attempt to ensure software is developed, built, and deployed with minimal technical issues.
+
+[Wikipedia's DevOps Toolchain page](https://en.wikipedia.org/wiki/DevOps_toolchain) lists the following "toolchains" or procedures as befitting of the DevOps ideology.
+
+- Coding: code development and review, source code management tools, code merging.
+
+- Building: continuous integration tools, build status.
+
+- Testing: continuous testing tools that provide quick and timely feedback on business risks.
+
+- Packaging: artifact repository, application pre-deployment staging.
+
+- Releasing: change management, release approvals, release automation.
+
+- Configuring: infrastructure configuration and management, infrastructure as code tools.
+
+- Monitoring: applications performance monitoring, end-user experience.
+
+Several toolchains can be handled with version control software such as git and subversion. Other toolchains are handled by that version control's main tooled website, such as GitHub and GitLab.
+
+***
+
+
+## <a name="recommended"></a>Recommended Reads
+
+Full disclosure: other people know much more than me about DevOps and GitHub Actions. Learn from them by following along in the list of recommended readings below.
+
+- [Andre Muller's Unit Testing in R](https://towardsdatascience.com/unit-testing-in-r-68ab9cc8d211)
+
+- [Jim Hester's `lintr` Package for Static Code Analysis in R](https://cran.r-project.org/web/packages/lintr/readme/README.html)
+
+- [Chris Brown et al's **GitHub Actions with R** book](https://orchid00.github.io/actions_sandbox/)
+
+- [Ryo Nakagawara's Creating a data pipeline with Github Actions & the {googledrive} package for the Canadian Premier League soccer data initiative!](https://ryo-n7.github.io/2021-09-23-CanPL-GoogleDrive-GithubActions-Tutorial/)
+
+- [Some Sample GitHub Actions with R](https://github.com/r-lib/actions/tree/v2/examples)
+
+
+#### END OF NOTES

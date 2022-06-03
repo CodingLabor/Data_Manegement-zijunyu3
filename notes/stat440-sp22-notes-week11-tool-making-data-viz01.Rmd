@@ -1,0 +1,741 @@
+---
+title: "STAT 440 Statistical Data Management - Spring 2022"
+output: html_document
+editor_options: 
+  chunk_output_type: inline
+---
+## Week 11 Notes
+### Created by Christopher Kinson
+
+
+***
+
+
+## Table of Contents
+
+- [Introduction to R Chapter 10](#introduction-to-r-chapter10)  
+  - [Custom Functions AKA Tools](#functions)  
+  - [Custom Binary Operators](#binary-operators)  
+- [Data Visualization in Base R](#data-viz-base)  
+- [Macro Elements](#data-viz-macro)  
+  - [Narrative](#data-viz-narrative)  
+  - [Plot Type](#data-viz-plot)  
+  - [Title](#data-viz-title)  
+  - [Axes](#data-viz-axes)  
+- [Micro Elements](#data-viz-micro)  
+  - [Plotting Characters](#data-viz-plotting)  
+  - [Color and Transparency](#data-viz-color)  
+  - [Width and Size](#data-viz-width)  
+  - [Quantity of Plots](#data-viz-quantity)  
+  - [Removing Clutter](#data-viz-removing)  
+  - [Employing Visual Hierarchy](#data-viz-employing)  
+
+
+***
+
+## <a name="introduction-to-r-chapter10"></a>Introduction to Custom Data Management Tools
+
+Below, I introduce the idea of creating your own functions and data management tools. The bulk of this material is covered in STAT 385. One reference textbook for that course is [An Introduction to R. Venables, Smith and the R Core Team](https://cran.r-project.org/doc/manuals/r-release/R-intro.pdf). Another useful reference textbook for that course is [Hands-On Programming with R by G. Grolemund's](https://rstudio-education.github.io/hopr/)
+
+The crux of what you do as a data engineer is create your own tools. These tools can greatly speed up data analysis, data wrangling, data visualization, modeling, etc. They speed up the processes because we can eliminate very specific redundant code, and utilize general flexible code that works for multiple uses and cases. 
+
+### <a name="functions"></a>Custom Functions AKA Tools
+
+R allows users to create their own functions (i.e. user-defined functions) AKA tools using the `function()`. User-defined functions can be created with 
+
+- \*arguments that may be named or unnamed; think of arguments as inputs 
+
+- expressions which are code that perform the actions; think of expressions as the body of the function
+
+- braces which wrap around the expressions
+
+- \*optional returned objects as outputs
+
+```
+newfunction <- function(namedarg=argument01){
+  expressions
+}
+```
+
+Using the function to see the results becomes:
+
+```
+newfunction(input)
+```
+
+Below, see the Figure 2.6 from G. Grolemund's Hands-On Programming with R that helps explain how functions are designed.
+
+![](https://rstudio-education.github.io/hopr/images/hopr_0106.png)
+
+Your custom functions can be complicated or simple. It will depend on the nature of what you want to build and your programming skill set. Here are some examples.
+
+1. A $t$-statistic for the two-sample case (found in the Introduction to R textbook)
+
+```{r}
+twosam <- function(y1, y2) {
+  n1 <- length(y1); n2 <- length(y2)
+  yb1 <- mean(y1); yb2 <- mean(y2)
+  s1 <- var(y1); s2 <- var(y2)
+  s <- ((n1-1)*s1 + (n2-1)*s2)/(n1+n2-2)
+  tst <- (yb1 - yb2)/sqrt(s*(1/n1 + 1/n2))
+  tst
+}
+twosam(rnorm(20),rnorm(20))
+```
+
+2. An $n$-dimensional correlation matrix with exchangeable correlation $\rho$
+
+```{r}
+exc <- function(n,rho){
+  mat <- array(rho,dim=c(n,n))
+  mat2 <- array(c(1:n,1:n),dim=c(n,2))
+  mat[mat2] <- 1 
+  mat
+}
+exc(5,0.5)
+```
+
+3. In STAT 385, we discussed card shuffling and the concept of randomization. Using the Uno deck of cards created as a dataset, we can create a function that shuffles the deck. This function is general because we supply the deck, and we do not require the function to use only the cards from those notes.
+
+```{r}
+cards_faces <- c(rep(c(0:9, 1:9, rep(c("Skip","Reverse","Draw+2"),2)), 4),rep(c("Wild","WildDraw+4"), each=4))
+cards_colors <- c(rep(c("red","blue","green","yellow"), each=25), rep("any",8))
+cards_points <- c(rep(c(0:9, 1:9, rep(20, 6)), 4), rep(50,8))
+cards_tibble <- tibble::tibble(face=cards_faces, color=cards_colors, point=cards_points)
+
+shuffle <- function(deck){
+  if(all(class(deck)!="data.frame")){
+    return("Not a data frame. Supply a data frame as input.")
+  }
+  else{
+    return(deck[sample(dim(deck)[1]),])
+  }
+}
+shuffle(cards_tibble)
+```
+
+**SN: Using the double colon notation `::`, we can call or reference a library for use with its particular functions. In this way, we don't have to use the `library()` function, but the package must be installed.**
+
+Pay close attention to the fact that objects created within the body of a function are not global/permanent objects in R's environment.
+
+```{r eval=FALSE}
+mat #this object doesn't exist
+```
+
+Functions create local/temporary objects that exist within the function and nowhere else. To your surprise, this is a good thing, because when global objects are referenced multiple times in a program. It may lead to confusion and lots of reviewing to find mistakes each time it's referenced. Read this https://www.learncpp.com/cpp-tutorial/why-global-variables-are-evil/ for more details.
+
+### <a name="binary-operators"></a>Custom Binary Operators
+
+Binary operators are special operators that take two arguments which are essentially one object on the left-hand-side and one object on the right-hand-side of the operator. We have seen at least one binary operator: the modulus `%%` when we wanted a vectorized way to identify if a number was prime or not.
+
+We can create user-defined binary operators with the `function()`, but we must name the object as `"%somethinghere%"`. Below is an example of a custom binary operator that identifies elements of the vectors that are not in common in both objects. This custom binary operator works much like the `setdiff()` function and is opposite of the `match()` function. The `match()` function and `%in%` binary operator are similar. `%in%` returns a logical vector of which values of the left-hand-side object appear in the right-hand-side object. The `match()` function goes an extra step and returns the positions of (first) matches of its first argument in its second.
+
+```{r}
+1:10 %in% 5:10
+match(1:10,5:10)
+```
+
+
+```{r}
+"%out%" <- function(LHS, RHS){
+  unique(LHS[is.na(RHS[match(LHS, RHS)])])
+}
+1:10%out%5:10
+setdiff(1:10,5:10)
+```
+
+
+***
+
+## <a name="data-viz-base"></a>Data Visualization in Base R
+
+Plots, graphs, and visual charts are the most crucial tools we have as data analysts, statisticians, and data scientists. In the notes that follow, I will highlight base R plotting capabilities. Consider these notes as a reference for what's possible in R for data visualization (data viz for short). Most details you will need to explore on your own beyond these notes.
+
+For both base R and Tidyverse mechanisms, I will break down the data viz concepts into two sections: Macro and Micro elements of data viz.
+
+
+***
+
+
+## <a name="data-viz-macro"></a>Macro Elements
+
+The `plot()` function in base R is quite powerful and flexible. It has variants depending on the type of plot users intend to create. Which brings us to the Macro elements I believe are needed for any data viz.
+
+- Narrative
+
+- Plot type
+
+- Title
+
+- Axes
+
+We explain by example but first, let's import the [City of Urbana's Rental Inspection Grades Listings Data - structured comma-separated](https://uofi.box.com/shared/static/qfpwd1kcggxmpktvnjuzjxv4812ji9e5.csv).
+
+```{r}
+library(tidyverse)
+rentals_data <- read_csv("https://uofi.box.com/shared/static/qfpwd1kcggxmpktvnjuzjxv4812ji9e5.csv", 
+    col_types = cols(`Inspection Date` = col_date(format = "%m/%d/%Y"), 
+        `Expiration Date` = col_date(format = "%m/%d/%Y")))
+str(rentals_data)
+```
+
+When creating data visualizations in RStudio, we have a couple ways to ensure that the images are plotted the way that we expect them to. In RStudio, the default plotting output is set to "Chunk Output Inline". This means that the plots will appear below the code chunk as a way to view them prior to rendering to html. 
+
+![](https://uofi.box.com/shared/static/og371b22tvqabbdq21b2ucc7z3ifip7l.png)
+
+However, the plots won't look the way they will once we render them. This is why we need to open the plot in a New Window and Maximize the window.
+
+![](https://uofi.box.com/shared/static/9e6mls9hyslixq51gdbhgeqnsckwoyld.png)
+
+![](https://uofi.box.com/shared/static/7ahkqsvcoxab1r2licfeh8lwkpz085br.png)
+
+![](https://uofi.box.com/shared/static/ht39seybm0wgxqdxrgl0difha2qogzne.png)
+
+Suppose you want the plots to appear in the Plots pane of RStudio. To do that, we change the plotting output to "Chunk Output in Console". 
+
+![](https://uofi.box.com/shared/static/2lkgcadaa5yboi6dbpkz1u4orjvvs32q.png)
+
+Next, RStudio may ask if you want to remove "Current output" or "Keep output". Regardless of which you select, once you run the code chunk, the plot will appear in the Plots pane. 
+
+![](https://uofi.box.com/shared/static/6b26q53irynx6qdf58bvloiioc1wjqbz.png)
+
+We still need to view them in their maximized version, because the plots don't look the way they will when we render them. Thus, we click on Zoom in the Plots pane and we can see the maximized version of the plot. This is the way the plot will look when rendered to html.
+
+### <a name="data-viz-narrative"></a>Narrative
+
+Considering the narrative of your data viz is crucial to the final product meeting your expectations. Thinking about the narrative also allows for clear communication in the data viz to your audience. The following comes from Chapter 1 of Knaflic's [Storytelling with Data](https://www.storytellingwithdata.com/) book.
+
+**1. You need to know your audience.**
+
+- Audiences can be very detail-oriented, big-picture-oriented, or anywhere in between.
+
+- In this class, the audience is usually the Instructor, course staff, and your fellow classmates.
+
+- If you are employed, the audience may be your client, supervisor, or team.
+
+- You **must** to alter your narrative and resulting data visualization for your specific audience.
+
+**2. What do you want the audience to know or do?**
+
+**3. How you will you deliver what you want the audience to know?**
+
+- Consider what needs to happen in order for the visualization to be interpreted well. Do those things.
+
+- Creating simple storyboards with pen and paper will help in organizing your narrative and resulting data viz.
+
+
+### <a name="data-viz-plot"></a>Plot Type
+
+Statistics majors are likely to see or create these plots prior to graduation: scatter plot, bar plot, and time series plot. The type of plot you will need depends on the data and your narrative.
+
+For scatter plots, we plot two numeric vectors. In the **rentals_data**, we don't have two purely numeric vectors. But let's imagine that the Parcel Numbers and the Address Number for the properties were intended to be shown in a scatter plot. Then the plot might be.
+
+```{r}
+plot(rentals_data$`Parcel Number`, str_extract(rentals_data$`Property Address`, "\\d+"), pch=19) #first argument is horizontal axis, second argument is vertical axis
+```
+
+Although it doesn't look great, we will address the other Macro elements and Micro elements to make the data viz better.
+
+As the name suggests, a time series plot (aka "index plot" aka "series plot") is a plot of a vector of values that have a time dimension. For the **rentals_data**, the number of inspections each date could be plotted as a time series.
+
+```{r}
+inspection_dates_n <- rentals_data %>%
+  count(`Inspection Date`)
+
+plot(inspection_dates_n$n, type = "l")
+```
+
+We can create a bar plot in base R using the `barplot()` function. In order for this to work, we first use the `table()` function to explicitly count the frequencies for a factor/categorical variable. For the **rentals_data**, the frequency of Grades is sensible for a bar plot. That bar plot may be vertical as seen below.
+
+```{r}
+barplot(table(rentals_data$Grade))
+```
+
+Or horizontal bar plot.
+
+```{r}
+barplot(table(rentals_data$Grade), horiz = TRUE)
+```
+
+
+### <a name="data-viz-title"></a>Title
+
+The title of a plot is an immediate sign post to your audience. Usually, we use it to generalize the data viz, but at times, we may want to point out a particular detail. In any case, the title is created using the `main=` argument of the `plot()` function.
+
+```{r}
+plot(inspection_dates_n$n, type = "l", main="Number of Inspections Each Date")
+```
+
+Alternatively, we can omit the `main=` argument and employ the `title()` function to add the title to a plot.
+
+```{r}
+plot(inspection_dates_n$n, type = "l")
+title(main="Number of Inspections Each Date")
+```
+
+Again, there are options within these functions which may be discussed in the Micro elements section.
+
+
+### <a name="data-viz-axes"></a>Axes
+
+The last Macro element to consider is the axis or the axes of the data viz. You should have noticed that the plots shown above have axis labels, ranges of values, and tick marks for certain values. Axes are crucial for understanding the scale of the information being plotted and the context of the units measured. Several axis components can be altered within the plot function itself as arguments. For example, we can label the horizontal and vertical axes using the `xlab=` and `ylab=` arguments, respectively. We can also change the range of values shown in the axes using the `xlim=` and `ylim=` arguments. 
+
+```{r}
+plot(inspection_dates_n$n, 
+     type = "l",
+     main="Number of Inspections Each Date",
+     xlab=paste("Dates between",range(inspection_dates_n$`Inspection Date`)[1],"and",range(inspection_dates_n$`Inspection Date`)[2]),
+     ylab="Frequency",
+     ylim = c(0,25)
+     )
+```
+
+If we wanted even more control over the axis' lines and ticks and ranges of values for the axes, we can hide the default axes in the `plot()` function using the `axis=FALSE` argument, and use the `axis()` function to change those details. Some common details we can make using the `axis()` function include:
+
+- location of the axis with the `side=` argument
+
+- location of the tick marks with the `at=` argument
+
+- labels of the ticks can be numeric or character with the `labels=` argument so long as the `at=` argument is also used
+
+- showing or hiding the label of the ticks using the `labels=TRUE` or `labels=FALSE` argument, respectively 
+     
+- show or hide the tick marks and the line in-between the tick marks using the `tick=TRUE` or `tick=FALSE`, respectively
+
+- show labels in vertical or horizontal orientation using the `las=1` or `las=2` argument, respectively
+
+- width of the line in-between the tick marks using the `lwd=` argument, where `las=0` means no line drawn, and `las=1` represents the default line width
+
+- width of the tick marks using the `lwd.ticks=` argument, where `lwd.ticks=0` means no tick mark drawn, and `lwd.ticks=1` represents the default tick mark width
+
+```{r}
+plot(inspection_dates_n$n, 
+     type = "l", 
+     ylab="",
+     xlab="Dates",
+     axes=FALSE
+     )
+title(main="Number of Inspections Each Date")
+axis(side=2, 
+     at=seq(0,25,5), 
+     labels=TRUE, 
+     tick=FALSE,
+     las=1
+     )
+axis(side=1, 
+     at=c(1,ceiling(length(inspection_dates_n$`Inspection Date`)/2),length(inspection_dates_n$`Inspection Date`)),
+     labels = as.character(c(inspection_dates_n$`Inspection Date`[1],inspection_dates_n$`Inspection Date`[ceiling(length(inspection_dates_n$`Inspection Date`)/2)],inspection_dates_n$`Inspection Date`[length(inspection_dates_n$`Inspection Date`)])), 
+     lwd = 0, 
+     lwd.ticks = 1
+     )
+```
+
+There. We've discussed the Macro elements of any data visualization. Now let's deal with those pesky Micro elements.
+
+
+## <a name="data-viz-micro"></a>Micro Elements
+
+There's a wealth of details that can be added or adjusted to plots in base R. The details below are in my opinion, the Micro elements that every data visualization should address:
+
+- Plotting characters
+
+- Color and transparency
+
+- Width and size
+
+- Quantity of plots
+
+- Removing clutter
+
+- Employing visual hierarchy
+
+We explain by example.
+
+### <a name="data-viz-plotting"></a>Plotting Characters
+
+Although the `plot()` function is versatile, at times, it may be more beneficial to use the specific plotting character functions such as `points()`, `lines()`, and `text()`. All 3 functions behave similarly in that they need values for horizontal and vertical axis elements. The arguments used in `plot()` also may be used in these particular plotting character functions. Here's an example using each one. Keep in mind that we need to suppress or hide the plotting characters within the `plot()` function using the `type="n"` argument.
+
+Using the `points()` function.
+
+```{r}
+plot(rentals_data$`Parcel Number`,
+     str_extract(rentals_data$`Property Address`, "\\d+"),
+     type="n",
+     main="Parcel Numbers vs House Numbers")
+points(rentals_data$`Parcel Number`,
+     str_extract(rentals_data$`Property Address`, "\\d+"),
+     pch=19)
+```
+
+Using the `lines()` function.
+
+```{r}
+plot(inspection_dates_n$n, 
+     type = "n", 
+     ylab="",
+     xlab="Dates",
+     axes=FALSE,
+     main="Number of Inspections Each Date"
+     )
+lines(inspection_dates_n$n
+     )
+axis(side=2, 
+     at=seq(0,25,5), 
+     labels=TRUE, 
+     tick=FALSE,
+     las=1
+     )
+axis(side=1, 
+     at=c(1,ceiling(length(inspection_dates_n$`Inspection Date`)/2),length(inspection_dates_n$`Inspection Date`)),
+     labels = as.character(c(inspection_dates_n$`Inspection Date`[1],inspection_dates_n$`Inspection Date`[ceiling(length(inspection_dates_n$`Inspection Date`)/2)],inspection_dates_n$`Inspection Date`[length(inspection_dates_n$`Inspection Date`)])), 
+     lwd = 0, 
+     lwd.ticks = 1
+     )
+```
+
+Using the `text()` function.
+
+```{r}
+plot(inspection_dates_n$n, 
+     type = "n", 
+     ylab="",
+     xlab="Dates",
+     axes=FALSE,
+     main="Number of Inspections Each Date"
+     )
+lines(inspection_dates_n$n
+     )
+text(c(1,ceiling(length(inspection_dates_n$`Inspection Date`)/2),length(inspection_dates_n$`Inspection Date`)), 
+     rep(23,3),
+     labels=as.character(c(inspection_dates_n$`Inspection Date`[1],inspection_dates_n$`Inspection Date`[ceiling(length(inspection_dates_n$`Inspection Date`)/2)],inspection_dates_n$`Inspection Date`[length(inspection_dates_n$`Inspection Date`)])),
+     cex=2
+     )
+```
+
+
+Here's an example of a text plot, which is a data visualization that only includes text (strings) as plotting characters. In this example, we are showing the percentage of Urbana rental properties with owners claiming Urbana as their primary residence vs owners not residing in Urbana.
+
+```{r textplot}
+owners_addresses <- read_csv("https://uofi.box.com/shared/static/7m2hlut865herv9zzgzvyl4ort0j7rhr.csv")
+
+rentals_data2 <- bind_cols(rentals_data, owners_addresses) %>% 
+  mutate(UrbanaOwner=str_detect(name,"URBANA")*1.0)
+
+plot(x=1:10, y=1:10, xlab="", ylab="", type="n", axes=FALSE, main="The Marketshare of Urbana Rental Properties")
+text(x=c(3,7), y=c(9,9), labels=paste0(100*round(table(rentals_data2$UrbanaOwner)/sum(table(rentals_data2$UrbanaOwner)),3),"%"), cex=5)
+text(x=c(3,7), y=c(5,5), labels=c("Owners Not\n Residing\n in Urbana","Owners Residing\n in Urbana"), cex=2)
+```
+
+
+### <a name="data-viz-color"></a>Color and Transparency
+
+We have a few ways to specify colors of plotting characters with the `plot()` function. We can specify the colors using the color's name in quotes with the `col=` argument. These colors, such as "red", exist and can be referenced with the vector `colors()`. Let's revisit the first plot, now using blue closed circles.
+
+```{r}
+head(colors())
+tail(colors())
+
+plot(rentals_data$`Parcel Number`, str_extract(rentals_data$`Property Address`, "\\d+"), pch=19, col="blue")
+```
+
+Instead of the color's name, we can use a number for the colors which correspond to a specific short set of colors (1 to 8). These colors come from the default palette which can be seen using the `palette()` vector. Let's show specific colors for the bar plot with numbers for the colors.
+
+```{r}
+palette()
+
+barplot(table(rentals_data$Grade), horiz = TRUE, col=2:7)
+```
+
+We can specify a particular color based on its RGB (red, green, blue) value in the `col=` argument with the `rgb()` function taking values between 0 to 255 for each. Alternatively, we can use hexadecimal digits of the RGB values of the form `"#RRGGBB"` ranging from 00 to FF. These RGB values can be found using Eyedropper/Color Picker apps (see PowerPoint or Paint).
+
+```{r}
+plot(inspection_dates_n$n, 
+     type = "l", 
+     ylab="",
+     xlab="Dates",
+     axes=FALSE,
+     col=rgb(232/255,74/255,39/255)
+     )
+title(main="Number of Inspections Each Date")
+axis(side=2, 
+     at=seq(0,25,5), 
+     labels=TRUE, 
+     tick=FALSE,
+     las=1
+     )
+axis(side=1, 
+     at=c(1,ceiling(length(inspection_dates_n$`Inspection Date`)/2),length(inspection_dates_n$`Inspection Date`)),
+     labels = as.character(c(inspection_dates_n$`Inspection Date`[1],inspection_dates_n$`Inspection Date`[ceiling(length(inspection_dates_n$`Inspection Date`)/2)],inspection_dates_n$`Inspection Date`[length(inspection_dates_n$`Inspection Date`)])), 
+     lwd = 0, 
+     lwd.ticks = 1
+     )
+```
+
+```{r}
+barplot(table(rentals_data$Grade), horiz = TRUE, col="#13294B") #similar Illinois blue based on Eyedropper
+```
+
+Rarely, you may want to add transparency to your color-filled characters to show how some values may intersect or to make some values less of the audience's focus. This can be accomplished using the `alpha=` argument within the `rgb()` function. The default value is `alpha=1` which means 0% transparency (or no transparency, i.e. opaque). Alpha values closer to 0 become more transparent, where `alpha=0` is 100% transparency.
+
+```{r}
+plot(rentals_data$`Parcel Number`,
+     str_extract(rentals_data$`Property Address`, "\\d+"),
+     pch=19, 
+     col=rgb(0,204/255,0,alpha=0.25))
+title(main="Parcel Numbers vs House Number")
+```
+
+
+### <a name="data-viz-width"></a>Width and Size
+
+Here, I mean the width and size parameters for plotting characters, titles, and axes labels. Typically, we use the `lwd=` argument to specify point or line width. The `cex=` argument is for the plotting text and symbols and the number represents how those should be magnified relative to the default. The default value for these arguments is a size of 1. You can imagine these sizes becoming as large or small as you wish. These arguments may be used in the general `plot()` function or in the specific plotting character functions (as well as `title()` and `axis()`) mentioned above.
+
+```{r}
+plot(rentals_data$`Parcel Number`,
+     str_extract(rentals_data$`Property Address`, "\\d+"),
+     pch=19, 
+     lwd=2,
+     col=rgb(0,204/255,0,alpha=0.25),
+     cex=2)
+title(main="Parcel Numbers vs House Number", cex=1.5)
+```
+
+
+A **bubble plot** would then be a scatter plot where the width of the points, `lwd=`, corresponds to a vector of size. 
+
+
+### <a name="data-viz-quantity"></a>Quantity of Plots
+
+The `par()` function gives us control over graphical parameters in R. Often we may use it to show multiple plots in a single graphics device by adjusting the matrix for that graphics device. Graphics devices are defaulted to be a 1 by 1 matrix.
+
+```{r}
+par(mfrow=c(1,2)) 
+plot(rentals_data$`Parcel Number`,
+     str_extract(rentals_data$`Property Address`, "\\d+"),
+     pch=19, 
+     lwd=2,
+     col=rgb(0,204/255,0,alpha=0.25),
+     cex=1)
+title(main="Parcel Numbers vs House Number", cex=1.5)
+barplot(table(rentals_data$Grade), 
+        horiz = TRUE, 
+        col="#13294B", 
+        main = "Inspection Grades") 
+
+#Don't forget to change the graphics parameter back to the 1 by 1 matrix
+par(mfrow=c(1,1))
+```
+
+```{r}
+x11()
+par(mfrow=c(2,1)) 
+plot(rentals_data$`Parcel Number`,
+     str_extract(rentals_data$`Property Address`, "\\d+"),
+     pch=19, 
+     lwd=2,
+     col=rgb(0,204/255,0,alpha=0.25),
+     cex=1)
+title(main="Parcel Numbers vs House Number", cex=1.5)
+barplot(table(rentals_data$Grade), 
+        horiz = TRUE, 
+        col="#13294B", 
+        main = "Inspection Grades") 
+
+#Don't forget to change the graphics parameter back to the 1 by 1 matrix
+par(mfrow=c(1,1))
+```
+
+
+### <a name="data-viz-removing"></a>Removing Clutter
+
+Ideally we want to create data visualizations that are high signal (i.e. information we want to communicate) and low noise (i.e. distracting or useless information, aka clutter)
+
+- Clutter is any visual thing that does not increase your/our/the audience’s understanding.
+
+- When we take in information that is called cognitive load. The audience deserves low cognitive load.
+
+- Take care to remove clutter in your data viz!
+
+Removing clutter in data viz using base R might mean to consider removing lines, boxes, text, and any other elements that currently exist in order to create more whitespace.
+
+The following graphics comes from Chapter 3 of Knaflic's [Storytelling with Data](https://www.storytellingwithdata.com/) book. 
+
+![Before and after 1](https://uofi.box.com/shared/static/qi3q1i5aoeld1z1qhp4c3mjttj16kloq.png)
+
+![Before and after 2](https://uofi.box.com/shared/static/zn7x9j14zd8uovr655jh0hpbfk741m6n.png)
+
+![Before and after 3](https://uofi.box.com/shared/static/zs9w7tbwvy9stijv1tv6h9ilnk0tw6qc.png)
+
+Here's an example using the Rentals Data, where we want to map the properties and guide the audience to particular information. In order to get that data, we must wrangle it using ideas from the Regex and string manipulation notes.
+
+```{r}
+Coordinates<-str_split(rentals_data$`Mappable Address`, "\\\n", simplify = TRUE)
+
+Coordinates[,1] <- str_replace(Coordinates[,1],"1\\s2","1/2")
+
+Coordinates <- as_tibble(Coordinates) %>%
+  mutate(City="Urbana", State="IL") %>%
+  select(-V2)
+Coordinates00 <- str_remove_all(Coordinates$V3, "\\)|\\,|\\(")
+Coordinates000 <- str_split(Coordinates00, " ", simplify = TRUE)
+
+RentalsData <- rentals_data %>%
+  mutate(Coordinates01 = as.numeric(Coordinates000[,1]),
+Coordinates02 = as.numeric(Coordinates000[,2]))
+
+c01 <- ifelse(RentalsData$Coordinates01<0,RentalsData$Coordinates02,RentalsData$Coordinates01)
+c02 <- ifelse(RentalsData$Coordinates02>0,RentalsData$Coordinates01,RentalsData$Coordinates02)
+
+RentalsData2 <- RentalsData %>%
+  mutate(Latitude = c01, Longitude = c02, City = Coordinates$City, State = Coordinates$State) %>%
+  select(-c(`Mappable Address`,Coordinates01,Coordinates02))
+
+rm(c01,c02,Coordinates00,Coordinates,RentalsData)
+gc()
+```
+
+Here's a basic plot of the Urbana Rental Properties.
+
+```{r}
+plot(RentalsData2$Longitude,
+     RentalsData2$Latitude,
+     main="Urbana Rental Properties",
+     pch=19,
+     xlab="Longitude",
+     ylab="Latitude")
+```
+
+
+Here's an improved plot that removes clutter.
+
+```{r}
+plot(RentalsData2$Longitude,
+     RentalsData2$Latitude,
+     main="Urbana Rental Properties",
+     pch=19,
+     col="lightgray",
+     xlab="Longitude",
+     ylab="Latitude",
+     frame.plot = FALSE,
+     axes=FALSE)
+points(-88.227244,
+       40.109399,
+       pch=19,
+       col=rgb(19/255,41/255,75/255,alpha=0.5),
+       lwd=200
+       )
+grid()
+```
+
+### <a name="data-viz-employing"></a>Employing Visual Hierarchy
+
+Employing Visual Hierarchy is partly removing clutter and partly using preattentive attributes such as text size, text emphasis, color, and lines to draw the audience's eyes where you want them to go.
+
+The following graphic comes from Chapter 4 of Knaflic's [Storytelling with Data](https://www.storytellingwithdata.com/) book. Notice how your eyes navigate the image. Write down where your eyes go first, second, and third.
+
+![](https://uofi.box.com/shared/static/sf7lp65i60bguma0fjfnsqou7dnfc4ko.png)
+
+This kind of visual hierarchy can be employed in data viz as well by manipulating the Macro and Micro elements mentioned above. See Knaflic's graphics below for a transformation of data visualization beginning with a basic plot and becoming a plot that is informative and visually easy for the audience to navigate. Also notice the user's attention to detail regarding narrative. We can employ similar strategies in base R.
+
+![Basic plot](https://uofi.box.com/shared/static/2xgtmmns2dlbkcsijt1a7pm3jhtg5fp4.png)
+
+![Better plot with colors guiding the eyes](https://uofi.box.com/shared/static/d333caswt7ydaoebkqh6kybjp61gbxl5.png)
+
+![Informative with visual hierarchy and narrative](https://uofi.box.com/shared/static/dhykhj1p845t73t0wremoqdt6m6sa5tb.png)
+
+Here's an example using the Rentals Data, where we want to map the properties and guide the audience to particular information.
+
+Again, the original map.
+
+```{r}
+plot(RentalsData2$Longitude,
+     RentalsData2$Latitude,
+     main="Urbana Rental Properties",
+     pch=19,
+     xlab="Longitude",
+     ylab="Latitude")
+```
+
+The de-cluttered map.
+
+```{r}
+plot(RentalsData2$Longitude,
+     RentalsData2$Latitude,
+     main="Urbana Rental Properties",
+     pch=19,
+     col="lightgray",
+     xlab="Longitude",
+     ylab="Latitude",
+     frame.plot = FALSE,
+     axes=FALSE)
+points(-88.227244,
+       40.109399,
+       pch=19,
+       col=rgb(19/255,41/255,75/255,alpha=0.5),
+       lwd=200
+       )
+grid()
+```
+
+Next, we use some additional data wrangling.
+
+```{r}
+owners_addresses <- read_csv("https://uofi.box.com/shared/static/7m2hlut865herv9zzgzvyl4ort0j7rhr.csv")
+
+RentalsData3 <- RentalsData2 %>%
+  mutate(grade_n = ifelse(Grade=="Class N", 1, Grade), 
+         grade_f = ifelse(Grade=="Class F", 2, grade_n),
+         grade_d = ifelse(Grade=="Class D", 3, grade_f),
+         grade_c = ifelse(Grade=="Class C", 4, grade_d),
+         grade_b = ifelse(Grade=="Class B", 5, grade_c),
+         grade_numeric = as.numeric(ifelse(Grade=="Class A", 6, grade_b)),
+         grade_prop = grade_numeric/6)
+
+a_ids <- which(RentalsData3$Grade=="Class A")
+
+RentalsData4 <- bind_cols(RentalsData3, owners_addresses) %>% 
+  rename(OwnerAddress=name)
+  
+
+city3 <- str_split(RentalsData4$OwnerAddress, "\\n", simplify=TRUE)[,3]
+city4 <- str_split(RentalsData4$OwnerAddress, "\\n", simplify=TRUE)[,4]
+
+urbana_n<- sum(str_count(city3,"URBANA")+str_count(city4,"URBANA"))
+```
+
+
+Then comes the map employing visual hierarchy.
+
+```{r}
+plot(RentalsData4$Longitude,
+     RentalsData4$Latitude,
+     pch=19,
+     col="lightgray",
+     xlab="Longitude",
+     ylab="Latitude",
+     frame.plot = FALSE,
+     axes=FALSE)
+title(main="Urbana Rental Properties")
+points(-88.227244,
+       40.109399,
+       pch=19,
+       col=rgb(19/255,41/255,75/255,alpha=0.5), #blue radius
+       lwd=200
+       )
+points(RentalsData4$Longitude[a_ids],
+       RentalsData4$Latitude[a_ids],
+       pch=19,
+       col=rgb(232/255,74/255,39/255)) #orange dots
+text(median(range(RentalsData4$Longitude))+0.02,
+     median(range(RentalsData4$Latitude))+0.026,
+     labels="Grade A Properties",
+     col=rgb(232/255,74/255,39/255),
+     cex=1.5)
+text(median(range(RentalsData4$Longitude))+0.02,
+     median(range(RentalsData4$Latitude))+0.02,
+     labels=paste0("Only " ,round(100*urbana_n/nrow(RentalsData4),2), "% of all Urbana\n rental properties are owned \nby people living in Urbana"))
+grid()
+```
+
+
+#### END OF NOTES
