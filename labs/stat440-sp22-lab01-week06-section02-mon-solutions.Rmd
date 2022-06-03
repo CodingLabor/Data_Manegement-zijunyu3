@@ -1,0 +1,61 @@
+# STAT 440 Statistical Data Management - Spring 2022
+## Week06 Lab01 Section 02 Mon
+### Both .Rmd and .html files must be submitted by the end of class plus a 10 minute grace period. Any lab submitted after that 10 minute grace period will be deducted 2 points for being late. Labs submitted after the lab solution is posted will not be accepted; resulting in a 0 for that driver's lab.
+#### Only the driver should submit this assignment into their individual student repo. Save the filename as lab01-week06-section02-mon-netID.Rmd and render this file to .html. 
+
+
+**#1** (Syllabus, Markdown) Using Markdown syntax, make a numbered list with the first and last names of everyone at your station. Your netID should appear in all lowercase text.
+
+**Answer:** Answers will vary, but must be a proper list with Driver's netID in all lowercase text.
+
+**#2** (Regex and string manipulation, Markdown) Write down your interpretation of the following R code: `str_remove("I have 200 friends spread across 3 networks", "\\d")`
+
+**Answer:** Exact wording will vary, but the correct answer is that the code will attempt to remove the first digit in the string. In this case only the number 2 will be removed.
+
+**#3** (Accessing and importing data) Import the Chicago 311 Service Requests for Abandoned Vehicles Data using its URL https://uofi.box.com/shared/static/526squ7ue3j2ugmjqp280ti0lwh68w10.csv and print the resulting last 10 rows.
+
+Chicago 311 Service Requests for Abandoned Vehicles Data description: The dataset contains 261486 observations and 22 columns. The subjects are reports of abandoned vehicles around Chicago such that those reports are made to Chicago's 311 service. A vehicle can be classified as abandoned if it meets one or more of the following criteria: 1) On a public way in a state of disrepair as to be incapable of being driven in its present condition. 2) Has not been moved or used for more than seven consecutive days and is apparently deserted. 3) Has been left on the public way without state registration or a temporary state registration placard for two or more days. 4) Is a hazardous dilapidated vehicle left in full view of the general public, whether on public or private property. Requests that have been labeled as Duplicates are in the same geographic area and have been entered into 311 Customer Service Requests (CSR) system at around the same time as a previous request. Duplicate reports/requests are labeled as such in the Status field, as either "Open - Dup" or "Completed - Dup." Original source is City of Chicago.
+
+**Answer:**
+
+```{r prob3}
+library(tidyverse) #load tidyverse package not just readr package
+d311 <- read_csv("https://uofi.box.com/shared/static/526squ7ue3j2ugmjqp280ti0lwh68w10.csv", 
+    col_types = cols(`Creation Date` = col_date(format = "%m-%d-%Y"), 
+        `Completion Date` = col_date(format = "%m-%d-%Y"))) #import data and reformat columns as dates
+slice_tail(d311,n=10) #print last 10 rows
+```
+
+**#4** (Accessing and importing data, Arranging data, Data reduction, Data expansion, Vectorization, Regular expressions and string manipulation) Beginning with the imported data in **Problem 3**, apply data management concepts to address the following:
+
+- Using the string manipulation on the Location column only, create two new numeric columns, "lat" and "lon" which contain the latitude and longitude values, respectively. Now print the first 10 rows of the data showing only the following columns: Location, lat, and lon.
+
+**Answer:**
+
+```{r prob4}
+d311 <- d311 %>%
+  mutate(lat=as.numeric(str_remove_all(str_extract(Location,"\\,\\s\\d\\d\\.\\d+"), "\\,|\\s")),lon=as.numeric(str_extract(Location,"\\-\\d\\d\\.\\d+"))) #add new column lat such that we extract the second number beginning with comma and whitespace and remove commas and whitespace, add new column lon such that we extract the first number beginning with negative sign (no need to remove anything)
+
+d311 %>%
+  select(Location,lat,lon) %>% #select 3 columns
+  slice_head(n=10) #print first 10 rows
+```
+
+**#5** (Arranging data, Data reduction, Data expansion, Vectorization, Regular expressions and string manipulation, Summarizing data, Combining data, Markdown) Beginning with the imported data in **Problem 3**, apply data management concepts to answer the following question(s) in Markdown syntax and complete sentence(s):
+
+- Among the service requests with fewer than average differences in creation date and completion date (measured in days), which Community Area Number is associated with the most 311 service requests for abandoned vehicles? Write your answer in Markdown syntax with complete sentence(s) and show code and result as evidence.
+
+**Answer:** Among the service requests with fewer than average differences in creation date and completion date (measured in days), Community Area 25 is associated with the most 311 service requests for abandoned vehicles.
+
+```{r prob5}
+d311 %>%
+  mutate(diffdays=difftime(`Completion Date`,`Creation Date`, units="days"), mn= mean(diffdays,na.rm=TRUE)) %>% #create new column called diffdays which is the difference between Completion Date and Creation Date and ensures the units of time equals days, add new column mn which computes the mean of the newly created column diffdays and removes NAs from the calculation of the mean
+  filter(diffdays<mn) %>% #filters rows that are less than mean diffdays
+  count(`Community Area`) %>% #counts frequencies of each Community Area
+  arrange(desc(n)) %>% #sort those frequencies in descending order
+  slice_head(n=5) #print first 5 rows
+
+rm(list=ls()) #remove all assigned objects from R's internal memory
+gc() #refreshes internal memory
+```
+

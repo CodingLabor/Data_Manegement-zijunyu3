@@ -1,0 +1,68 @@
+# STAT 440 Statistical Data Management - Spring 2022
+## Week08 Lab02 Section 02 Wed
+### Both .Rmd and .html files must be submitted by the end of class plus a 10 minute grace period. Any lab submitted after that 10 minute grace period will be deducted 2 points for being late. Labs submitted after the lab solution is posted will not be accepted; resulting in a 0 for that driver's lab.
+#### Only the driver should submit this assignment into their individual student repo. Save the filename as lab02-week08-section02-wed-netID.Rmd and render this file to .html. 
+
+
+**#1** This problem includes concepts from the following notes: Markdown. 
+
+**Problem:** Using Markdown syntax, make a numbered list with the first and last names of everyone at your station. Your netID should appear in all lowercase text.
+
+**Answer:** Answers will vary, but must be a proper list with Driver's netID in all lowercase text.
+
+**#2** This problem includes concepts from the following notes: Loops and conditional execution, Apply family of functions, Vectorization. 
+
+**Problem:** If the statement below is TRUE, then write TRUE in the **Answer** section and provide evidence (code and results) of your answer. If the statement below is FALSE, then write FALSE in the **Answer** section and provide evidence (code and results) to the contrary.
+
+- Statement: Using a `for` loop is the only way to perform repeated actions in R. 
+
+**Answer:** FALSE
+
+```{r prob2}
+1:5 + 6:10 #arithmetic operators are vectorized
+```
+
+**#3** This problem includes concepts from the following notes: Accessing and importing data.
+
+**Problem:** Import the Champaign County Sheriff Office & Jail Data and its data URL https://uofi.box.com/shared/static/b6kuknulot4bqyo7elc8gmm6qzhnk766.dat and print the resulting last 10 rows.
+
+- Data description for Champaign County Sheriff Office & Jail Data: The dataset contains 11082 observations and 40 columns for individuals who were booked into jail in Champaign County Jail. The individuals are identifiable based on personal identity, and they are given unique jacket numbers. Some rows in the data appear more than once because of multiple crimes being assigned to one person. But there is also the possibility of there being recidivists. A recidivist is a person who goes to jail repeatedly (more than one datetime). The demographics of the people, reasons for being booked, and crime code are also given in the data. The original source is the Champaign County Sheriff Office & Jail (CCSO).
+
+**Answer:**
+
+```{r prob3}
+library(tidyverse)
+jail <- read_csv("https://uofi.box.com/shared/static/b6kuknulot4bqyo7elc8gmm6qzhnk766.dat", 
+    col_types = cols(booking_date = col_date(format = "%m/%d/%Y"), 
+        booking_time = col_time(format = "%H:%M:%S"), 
+        released_date = col_date(format = "%m/%d/%Y"), 
+        released_time = col_time(format = "%H:%M:%S"))) #import data and reformat columns as dates and times
+slice_tail(jail,n=10) #print last 10 rows
+```
+
+**#4** This problem includes concepts from the following notes: Accessing and importing data, Arranging data, Data reduction, Data expansion, Vectorization, Regular expression and string manipulation, Summarizing data, Validating data.
+
+**Problem:** Beginning with the data imported in **Problem 3**, Use any validating data strategy to find all misspellings of the cities: Champaign and Urbana. Your resulting evidence should be a table or tibble containing the counts of these two cities (misspellings included).
+
+**Answer:** 
+
+```{r prob4}
+jail %>%
+  filter(str_detect(city,"^CHA\\w+G|^UR\\w+A")) %>% #keep rows with these misspellings and also includes some existing correct spellings
+  count(city) #count the spellings of the cities
+```
+
+**#5** This problem includes concepts from the following notes: Accessing and importing data, Arranging data, Data reduction, Data expansion, Vectorization, Regular expressions and string manipulation, Summarizing data, Cleaning data.
+
+**Problem:** Use any cleaning data approach to correct the misspelled cities: Champaign and Urbana. Your resulting evidence should be a table or tibble containing the counts of these two cities (corrected spellings).
+
+**Answer:** 
+
+```{r prob5}
+jail2 <- jail %>%
+  mutate(city=ifelse(str_detect(city,"^CHA\\w+G"),"CHAMPAIGN",city),city=ifelse(str_detect(city,"^UR\\w+A"),"URBANA",city)) #replaces incorrect spellings with correct ones
+  
+jail2 %>%
+  filter(str_detect(city,"^CHA\\w+G|^UR\\w+A"))  %>% #keep rows with these spellings which should now be only the correct spellings
+  count(city) #count the spellings of the cities
+```

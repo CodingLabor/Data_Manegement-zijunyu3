@@ -1,0 +1,98 @@
+# STAT 440 Statistical Data Management - Spring 2022
+## Week12 Lab03 Section 01 Wed
+### Both .Rmd and .html files must be submitted by the end of class plus a 10 minute grace period. Any lab submitted after that 10 minute grace period will be deducted 2 points for being late. Labs submitted after the lab solution is posted will not be accepted; resulting in a 0 for that driver's lab.
+#### Only the driver should submit this assignment into their individual student repo. Save the filename as lab03-week12-section01-wed-netID.Rmd and render this file to .html. 
+
+
+**#1** This problem includes concepts from the following notes: Markdown. 
+
+**Problem:** Using Markdown syntax, make a non-numbered list with the first and last names of everyone at your station. Your netID should appear in all lowercase text.
+
+**Answer:** Answers will vary. A non-numbered list does not include numbers. Sample below.
+
+- drivernetid
+
+- Passenger Name
+
+**#2** This problem includes concepts from the following notes/videos: SQL for weeks 03-07 content, Markdown. 
+
+**Problem:** If the statement below is TRUE, then write TRUE in the **Answer** section and provide evidence (code and results) that it is TRUE. If the statement below is FALSE, then write FALSE in the **Answer** section and provide evidence (code and results) that it is FALSE.
+
+- Statement: Importing data with the `read.csv()` function is a tidyverse method of importing data. 
+
+**Answer:** FALSE
+
+```{r prob2}
+library(tidyverse)
+read_csv("https://uofi.box.com/shared/static/66vf9hjpgm4vr8ydsw2zb51h13c4u0re.csv")
+```
+
+**#3** This problem includes concepts from the following notes: Accessing and importing data, SQL for weeks 03-07 content, SQL sub-queries.
+
+**Problem:** Import the 2020 NBA Season Dataset using this one data URL https://uofi.box.com/shared/static/gcyl1gya0qkoceg0vpydd26mpwczrs56.json, and use SQL to print last 10 rows of the data.
+
+- Data description for the NBA 2020 Season dataset: The dataset contains a total of 7 unique observations and 25 columns. The observations are professional basketball players in the National Basketball Association (NBA) and their season statistics for the 2020-2021 season. A stint is the duration of time someone worked for a particular employer. In this basketball data, a stint is a number representing the time a player was with a particular team. Some players are traded during the season, which means they would have more than 1 stint. A player's basketball statistics start over for each stint they have in a season. There are 7 unique player IDs across all stints. The original source is the NBA and Sports Reference. Also see the [2020 NBA Data Key](https://uofi.box.com/shared/static/oe2bbjn0xyhs9azbxaz00ab5ua6nbr9r.pdf).
+
+**Answer:**
+
+```{r prob3}
+library(jsonlite)
+library(sqldf)
+nba <- fromJSON("https://uofi.box.com/shared/static/gcyl1gya0qkoceg0vpydd26mpwczrs56.json")
+sqldf("
+       SELECT *
+       FROM nba
+       ")
+```
+
+**#4** This problem includes concepts from the following notes/videos: SQL for weeks 03-07 content, SQL sub-queries.
+
+**Problem:** Use SQL to create two new columns where the first column contains only the players' names and the second column contains only the players' IDs. After creating these two new columns, use SQL to remove the column called Player and to organize the columns such that the first two columns are Player Name and Player ID while the remaining columns appear in their current organization. **Resulting data should have 7 rows and 26 columns.**
+
+**Answer:**
+
+```{r prob4}
+nba1 <- sqldf("
+       SELECT
+        CASE 
+          WHEN Player='Damian Jones\\jonesda03' THEN 'Damian Jones'
+          WHEN Player='Gary Clark\\clarkga01' THEN 'Gary Clark'
+          WHEN Player='Ignas Brazdeikis\\brazdig01' THEN 'Ignas Brazdeikis'
+          WHEN Player='Moritz Wagner\\wagnemo01' THEN 'Moritz Wagner'
+          WHEN Player='Norvel Pelle\\pelleno01' THEN 'Norvel Pelle'
+          WHEN Player='Rodions Kurucs\\kurucro01' THEN 'Rodions Kurucs'
+        ELSE 'Victor Oladipo'
+        END AS `Player Name`,
+        CASE 
+        WHEN Player='Damian Jones\\jonesda03' THEN 'jonesda03'
+          WHEN Player='Gary Clark\\clarkga01' THEN 'clarkga01'
+          WHEN Player='Ignas Brazdeikis\\brazdig01' THEN 'brazdig01'
+          WHEN Player='Moritz Wagner\\wagnemo01' THEN 'wagnemo01'
+          WHEN Player='Norvel Pelle\\pelleno01' THEN 'pelleno01'
+          WHEN Player='Rodions Kurucs\\kurucro01' THEN 'kurucro01'
+        ELSE 'oladivi01'
+        END AS `Player ID`, Pos, Age, Tm, G, GS, MP, FG, FGA, `3P` , `3PA`, `2P`, `2PA`, FT, FTA, ORB, DRB, TRB,AST, STL, BLK, TOV, PF, PTS, stint
+       FROM nba
+      ")
+sqldf("
+      SELECT *
+      FROM nba1")
+```
+
+**#5** This problem includes concepts from the following notes/videos: Arranging data, Data reduction, Data expansion, Vectorization, Regular expressions and string manipulation, Summarizing data, Combining data, SQL for weeks 03-07 content, SQL sub-queries, Tool-making and programming Part01, Data visualization using base R, Micro Elements.
+
+**Problem:** Beginning with the data imported in **Problem 3**, use any data management concepts in order to create a similar data visualization to the one seen below, except: 1) instead of the color changing with the number of games played, the size of the points should change with the number of games played; 2) instead of a legend, convey this information as text inside of the plot. **This should be done using base R visualization methods. SQL not required.**
+
+![Image05](https://uofi.box.com/shared/static/brjz1vwzhll4zbqk7u3e2wangh3t3jjz.png)
+
+**Answer:**
+
+```{r prob5}
+plot(nba1$PTS,nba1$AST, xlab = "Total Points", ylab = "Total Assists", main = "Players by Points and Assists", lwd = nba1$G, pch = 20, frame.plot = FALSE, axes = FALSE)
+grid()
+axis(2, seq(0,25,5), las = 2, tick = FALSE)
+axis(1, seq(0,200,20), tick = FALSE)
+text(nba1$PTS + c(-10,0,-10,-10,7.5,10,-10), nba1$AST + c(0,1.5,0,0,0,0,0),labels = paste0(nba1$`Player Name`, "\n", nba1$Tm), cex = 0.5)
+points(5, 20, pch = 20, lwd=2)
+text(40, 20, labels = "Point size represents Games Played")
+```

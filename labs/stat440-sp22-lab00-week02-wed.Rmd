@@ -1,0 +1,42 @@
+# STAT 440 Statistical Data Management - Spring 2022
+## Week02 Practice Lab00 Wed
+### Both .Rmd and .html files must be submitted by 11:00 am. Any lab submitted after 11:00 am will be deducted 2 points for being late. Labs submitted after the lab solution is posted will not be accepted; resulting in a 0 for that driver's lab.
+#### Only the driver should submit this assignment into their individual student repo. Save the filename as lab00-week02-wed-netID.Rmd and render this file to .html. 
+
+**#1** (Syllabus, Markdown) Using Markdown syntax, make a numbered list with the first and last names of everyone at your station. Your name should appear in bold text.
+
+**Answer:**
+
+**#2** (Accessing and importing data, Markdown)
+
+statement: When importing a semi-structured dataset, we can use RStudio's Import Dataset Wizard.
+
+If the statement is true, then write TRUE below in all caps. Otherwise write FALSE in all caps.
+
+**Answer:** 
+
+**#3** (Git/GitHub, Markdown) Which of the following is a tokenized URL?
+
+a. https://data.urbanaillinois.us/api/views/6gtk-bwms
+
+b. https://github-dev.cs.illinois.edu/stat440-fa21/stat440-fa21-course-content/blob/master/data/trips440-data.txt
+
+c. https://raw.github-dev.cs.illinois.edu/stat440-fa21/stat440-fa21-course-content/master/data/chicago-food-inspections-data.csv?token=AAABJG5E3NYYWDFJPNK77YDBG7QAM
+
+d. https://data.ccrpc.org/dataset/traffic-crashes/resource/e8adba01-2e38-4a33-a8dc-571f05d76ffa
+
+e. None of the Above
+
+**Answer:** 
+
+**#4** (Accessing and importing data) Import the Rental Inspection Grades Listing Data using its data URL https://uofi.box.com/shared/static/lbqe1l9a2g5lr0twk6zcwajasybekget.json. Now, print the structure of the data. This structure should match the data description below.  
+
+  - The dataset (a .json file) contains the 1738 rental properties in Urbana with 7 variables ("columns") per property which includes details about the parcel number, address, grade, inspection date, and more. The rental properties are inspected on a rotating basis and can receive a letter grade of A, B, C, D, F, and N. The best grade is A. The original source is the City of Urbana.
+
+**Answer:**
+
+**#5** (Syllabus, Markdown) At your station, there is a puzzle. Solve and complete the puzzle and take a picture of the finished puzzle. Using Markdown syntax, include the picture (using a hyperlink) as the solution to this problem.
+
+**Answer:** 
+
+#### Only the driver should submit this assignment into their individual student repo. Save the filename as lab00-week02-mon-netID.Rmd and render this file to .html. 

@@ -1,0 +1,72 @@
+# STAT 440 Statistical Data Management - Spring 2022
+## Week06 Lab01 Section 02 Wed
+### Both .Rmd and .html files must be submitted by the end of class plus a 10 minute grace period. Any lab submitted after that 10 minute grace period will be deducted 2 points for being late. Labs submitted after the lab solution is posted will not be accepted; resulting in a 0 for that driver's lab.
+#### Only the driver should submit this assignment into their individual student repo. Save the filename as lab01-week06-section02-wed-netID.Rmd and render this file to .html. 
+
+
+**#1** (Syllabus, Markdown) Using Markdown syntax, make a numbered list with the first and last names of everyone at your station. Your netID should appear in all lowercase text.
+
+**Answer:** Answers will vary, but must be a proper list with Driver's netID in all lowercase text.
+
+**#2** (Regex and string manipulation, Markdown) Write down your interpretation of the following R code: `str_remove_all("I have 200 friends spread across 3 networks", "\\w")`
+
+**Answer:** Exact wording will vary, but the correct answer is that the code will attempt to remove all characters and digits because of the function's `_all` portion. In this case, only white space will remain.
+
+**#3** (Accessing and importing data) Import the Chicago 311 Service Requests for Abandoned Vehicles Data using its URL https://uofi.box.com/shared/static/526squ7ue3j2ugmjqp280ti0lwh68w10.csv and print the resulting first 10 rows.
+
+Chicago 311 Service Requests for Abandoned Vehicles Data description: The dataset contains 261486 observations and 22 columns. The subjects are reports of abandoned vehicles around Chicago such that those reports are made to Chicago's 311 service. A vehicle can be classified as abandoned if it meets one or more of the following criteria: 1) On a public way in a state of disrepair as to be incapable of being driven in its present condition. 2) Has not been moved or used for more than seven consecutive days and is apparently deserted. 3) Has been left on the public way without state registration or a temporary state registration placard for two or more days. 4) Is a hazardous dilapidated vehicle left in full view of the general public, whether on public or private property. Requests that have been labeled as Duplicates are in the same geographic area and have been entered into 311 Customer Service Requests (CSR) system at around the same time as a previous request. Duplicate reports/requests are labeled as such in the Status field, as either "Open - Dup" or "Completed - Dup." Original source is City of Chicago.
+
+**Answer:**
+
+```{r prob3}
+library(tidyverse) #load tidyverse package not just readr package
+d311 <- read_csv("https://uofi.box.com/shared/static/526squ7ue3j2ugmjqp280ti0lwh68w10.csv", 
+    col_types = cols(`Creation Date` = col_date(format = "%m-%d-%Y"), 
+        `Completion Date` = col_date(format = "%m-%d-%Y"))) #import data and reformat columns as dates
+slice_head(d311,n=10) #print first 10 rows
+```
+
+**#4** (Data reduction, Vectorization, Regex and string manipulation) Beginning with the imported data in **Problem 3**, apply data management concepts to answer the following question(s) in Markdown syntax and complete sentence(s):
+
+- What percentage of the original dataset's rows are not considered duplicates based on the information in the data description? Write your answer in Markdown syntax with complete sentence(s) and show code and result as evidence.
+
+**Answer:** The percentage of the original dataset's rows not considered duplicates based on the information in the data description is 79.49%.
+
+```{r prob4}
+nrow(d311[!str_detect(d311$Status, "Dup"),])/nrow(d311)*100 #does not filter for any Status values with string"Dup" in it and compute proportion then multiply by 100
+```
+
+**#5** (Accessing and importing data, Arranging data, Data reduction, Data expansion, Vectorization, Regular expressions and string manipulation, Summarizing data, Combining data, Markdown) Import the Chicago Public High Schools Progress Report Cards Data using its URL https://uofi.box.com/shared/static/2pd4ibwgbz0m5sojmc02svcihjrsgw5h.csv and combine the Chicago Public High Schools Progress Report Cards Data with the Chicago 311 Service Requests for Abandoned Vehicles Data (**imported in Problem 3**) in order to answer the following:
+
+- Among the service requests with fewer than average differences in creation date and completion date, which Community Area Name is associated with the most 311 service requests for abandoned vehicles? Write your answer in Markdown syntax with complete sentence(s) and show code and result as evidence.
+
+Chicago Public High Schools Progress Report Cards Data description: The dataset contains 93 rows and 42 columns. The subjects are high schools in the Chicago Public School system and their performance in various metrics of education. Some columns in this dataset include School ID and name, the type of school, Average student attendance, Rate of misconducts, 11th grade average ACT, Graduation rate, Freshmen on track %, Ward, and Location. Original source is City of Chicago.
+
+**Answer:** Among the service requests with fewer than average differences in creation date and completion date, AUSTIN is associated with the most 311 service requests for abandoned vehicles.
+
+```{r prob5}
+schools <- read_csv("https://uofi.box.com/shared/static/2pd4ibwgbz0m5sojmc02svcihjrsgw5h.csv") #import schools data
+
+d3112 <- d311 %>% 
+  rename(`Community Area Number`=`Community Area`) %>% #rename column
+  mutate(diffdays=difftime(`Completion Date`,`Creation Date`, units="days"), mn= mean(diffdays,na.rm=TRUE)) %>% #create new column called diffdays which is the difference between Completion Date and Creation Date and ensures the units of time equals days, add new column mn which computes the mean of the newly created column diffdays and removes NAs from the calculation of the mean
+  filter(diffdays<mn) #filters rows that are less than mean diffdays
+
+rm(d311) #remove d311 from R's internal memory
+gc() #refresh R's internal memory
+
+d3112 %>%
+  count(`Community Area Number`) %>%
+  arrange(desc(n)) %>%
+  slice_head(n=3) #just to check the 3 most frequent community area numbers
+
+x <- inner_join(schools, d3112, by="Community Area Number") #inner join schools and d311 data with new column name
+
+x %>%
+  count(`Community Area Number`,`Community Area Name`) %>% #counts frequencies of each Community Area
+  arrange(desc(n)) %>% #sort those frequencies in descending order
+  slice_head(n=3) #print first 3 rows
+
+rm(list=ls()) #remove all assigned objects from R's internal memory
+gc() #refreshes internal memory
+```

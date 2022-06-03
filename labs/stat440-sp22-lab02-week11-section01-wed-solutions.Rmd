@@ -1,0 +1,169 @@
+# STAT 440 Statistical Data Management - Spring 2022
+## Week11 Lab02 Section 01 Wed
+### Both .Rmd and .html files must be submitted by the end of class plus a 10 minute grace period. Any lab submitted after that 10 minute grace period will be deducted 2 points for being late. Labs submitted after the lab solution is posted will not be accepted; resulting in a 0 for that driver's lab.
+#### Only the driver should submit this assignment into their individual student repo. Save the filename as lab02-week11-section01-wed-netID.Rmd and render this file to .html. 
+
+
+**#1** This problem includes concepts from the following notes: Markdown. 
+
+**Problem:** Using Markdown syntax, make a numbered list with the first and last names of everyone at your station. Your netID should appear in all lowercase text.
+
+**Answer:** Answers will vary, but must be a proper list with Driver's netID in all lowercase text.
+
+**#2** This problem includes concepts from the following notes/videos: SQL for weeks 03-07 content, Markdown. 
+
+**Problem:** If the statement below is TRUE, then write TRUE in the **Answer** section and provide evidence (code and results) that it is TRUE. If the statement below is FALSE, then write FALSE in the **Answer** section and provide evidence (code and results) that it is FALSE.
+
+- Statement: An SQL subquery can take place within the **FROM** clause. 
+
+**Answer:** TRUE
+
+```{r prob2}
+library(sqldf)
+sqldf("SELECT *
+FROM (SELECT *
+FROM iris
+ORDER BY Species DESC
+LIMIT 10)
+ORDER BY Species
+      ") #print last 10 rows (not necessarily in order)
+```
+
+**#3** This problem includes concepts from the following notes: Accessing and importing data.
+
+**Problem:** Import the Champaign County Sheriff Office & Jail Data and its data URL https://uofi.box.com/shared/static/b6kuknulot4bqyo7elc8gmm6qzhnk766.dat and print the resulting structure of the data. **SQL not required.**
+
+- Data description for Champaign County Sheriff Office & Jail Data: The dataset contains 11082 observations and 40 columns for individuals who were booked into jail in Champaign County Jail. The individuals are identifiable based on personal identity, and they are given unique jacket numbers. Some rows in the data appear more than once because of multiple crimes being assigned to one person. But there is also the possibility of there being recidivists. A recidivist is a person who goes to jail repeatedly (more than one datetime). The demographics of the people, reasons for being booked, and crime code are also given in the data. The original source is the Champaign County Sheriff Office & Jail (CCSO).
+
+**Answer:**
+
+```{r prob3}
+library(tidyverse)
+jail_data <- read_csv("https://uofi.box.com/shared/static/b6kuknulot4bqyo7elc8gmm6qzhnk766.dat", 
+    col_types = cols(booking_date = col_date(format = "%m/%d/%Y"), 
+        booking_time = col_time(format = "%H:%M:%S"), 
+        released_date = col_date(format = "%m/%d/%Y"), 
+        released_time = col_time(format = "%H:%M:%S"))) #import data and reformat columns as dates and times
+
+str(jail_data)
+```
+
+**#4** This problem includes concepts from the following notes/videos: Arranging data, Data reduction, Data expansion, Vectorization, Regular expressions and string manipulation, Summarizing data, Combining data, SQL for weeks 03-07 content, SQL sub-queries, Tool-making and programming Part01, Data visualization using base R, Macro Elements.
+
+**Problem:** Use any data management concepts in order to recreate the data visualization but only addressing the macro elements using base R visualization methods.
+
+![Image04](https://uofi.box.com/shared/static/h8kytr6dcvpf9m7mdbvdzy1v91y0jfjz.png)
+
+**Answer:**
+
+```{r prob4}
+jailrnr <- jail_data %>%
+  select(booking_number,booking_date, jacket_number,`age arrest`, race, sex) %>% #keep these columns
+  mutate(newid=paste(booking_number,jacket_number)) %>% #make new column that concatenates booking_number and jacket_number because we know jacket_number is a unique ID but if a person appears more than once we need another ID column to distinguish between those repeating jacket_numbers
+  distinct(newid, .keep_all = TRUE) %>% #keep unique jacket_numbers based on newid with respect to all columns
+  count(jacket_number) %>% #count unique jacket_numbers only
+  mutate(recid_bin = ifelse(n>1,1,0)) #dichotomize for recidivists or not
+
+jail2 <- jail_data %>%
+  select(booking_number,booking_date, jacket_number,`age arrest`, race, sex) %>% #keep these columns
+  mutate(newid=paste(booking_number,jacket_number)) %>% #make new column that concatenates booking_number and jacket_number because we know jacket_number is a unique ID but if a person appears more than once we need another ID column to distinguish between those repeating jacket_numbers
+  distinct(newid, .keep_all = TRUE) %>%
+  mutate(rec=ifelse(jacket_number %in% jailrnr$jacket_number[jailrnr$recid_bin==1],1,0),
+         notrec=ifelse(jacket_number %in% jailrnr$jacket_number[jailrnr$recid_bin==1],0,1)) 
+
+jail3 <- jail2 %>%
+  group_by(booking_date) %>%
+  summarise(sum(rec),sum(notrec), n())
+  
+
+plot(jail3$booking_date,
+     100*jail3$`sum(rec)`/jail3$`n()`, 
+     type="l", 
+     col="blue",
+     main="Percentage of Recividists Each Day", 
+     frame.plot = FALSE, 
+     axes = FALSE,
+     xlab="Dates in 2019",
+     lwd=1.25,
+     ylab="")
+abline(h=100*colSums(jail3[,-1])[1:2]/sum(jail3$`n()`),
+       col=c("orange","magenta"), 
+       lwd=1.25)
+axis(2, 
+     at=seq(0,100,10), 
+     las=1, 
+     labels=seq(0,100,10), 
+     tick=FALSE,
+     mgp=c(1,0,0))
+axis(1,
+     at=jail3$booking_date[c(1,60,121,182,244,305)],
+     labels = jail3$booking_date[c(1,60,121,182,244,305)],
+     lwd=0,
+     lwd.ticks=1,
+     mgp=c(3,0.5,0))
+text(c(jail3$booking_date[round(365/2)],jail3$booking_date[round(365/2)]),
+     c(94,99),
+     labels=c("Avg % of Recidivists","Avg % of Non-Recidivists"),
+     col=c("orange","magenta"), 
+     lwd=1.25)
+```
+
+**#5** This problem includes concepts from the following notes/videos: Arranging data, Data reduction, Data expansion, Vectorization, Regular expressions and string manipulation, Summarizing data, Combining data, SQL for weeks 03-07 content, SQL sub-queries, Tool-making and programming Part01, Data visualization using base R, Micro Elements.
+
+**Problem:** Use any data management concepts in order to recreate the data visualization but only addressing the micro elements using base R visualization methods.
+
+![Image04](https://uofi.box.com/shared/static/h8kytr6dcvpf9m7mdbvdzy1v91y0jfjz.png)
+
+**Answer:**
+
+```{r prob5}
+jailrnr <- jail_data %>%
+  select(booking_number,booking_date, jacket_number,`age arrest`, race, sex) %>% #keep these columns
+  mutate(newid=paste(booking_number,jacket_number)) %>% #make new column that concatenates booking_number and jacket_number because we know jacket_number is a unique ID but if a person appears more than once we need another ID column to distinguish between those repeating jacket_numbers
+  distinct(newid, .keep_all = TRUE) %>% #keep unique jacket_numbers based on newid with respect to all columns
+  count(jacket_number) %>% #count unique jacket_numbers only
+  mutate(recid_bin = ifelse(n>1,1,0)) #dichotomize for recidivists or not
+
+jail2 <- jail_data %>%
+  select(booking_number,booking_date, jacket_number,`age arrest`, race, sex) %>% #keep these columns
+  mutate(newid=paste(booking_number,jacket_number)) %>% #make new column that concatenates booking_number and jacket_number because we know jacket_number is a unique ID but if a person appears more than once we need another ID column to distinguish between those repeating jacket_numbers
+  distinct(newid, .keep_all = TRUE) %>%
+  mutate(rec=ifelse(jacket_number %in% jailrnr$jacket_number[jailrnr$recid_bin==1],1,0),
+         notrec=ifelse(jacket_number %in% jailrnr$jacket_number[jailrnr$recid_bin==1],0,1)) 
+
+jail3 <- jail2 %>%
+  group_by(booking_date) %>%
+  summarise(sum(rec),sum(notrec), n())
+  
+
+plot(jail3$booking_date,
+     100*jail3$`sum(rec)`/jail3$`n()`, 
+     type="l", 
+     col="blue",
+     main="Percentage of Recividists Each Day", 
+     frame.plot = FALSE, 
+     axes = FALSE,
+     xlab="Dates in 2019",
+     lwd=1.25,
+     ylab="")
+abline(h=100*colSums(jail3[,-1])[1:2]/sum(jail3$`n()`),
+       col=c("orange","magenta"), 
+       lwd=1.25)
+axis(2, 
+     at=seq(0,100,10), 
+     las=1, 
+     labels=seq(0,100,10), 
+     tick=FALSE,
+     mgp=c(1,0,0))
+axis(1,
+     at=jail3$booking_date[c(1,60,121,182,244,305)],
+     labels = jail3$booking_date[c(1,60,121,182,244,305)],
+     lwd=0,
+     lwd.ticks=1,
+     mgp=c(3,0.5,0))
+text(c(jail3$booking_date[round(365/2)],jail3$booking_date[round(365/2)]),
+     c(94,99),
+     labels=c("Avg % of Recidivists","Avg % of Non-Recidivists"),
+     col=c("orange","magenta"), 
+     lwd=1.25)
+```

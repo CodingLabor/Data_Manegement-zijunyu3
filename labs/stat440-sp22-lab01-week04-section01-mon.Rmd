@@ -1,0 +1,51 @@
+# STAT 440 Statistical Data Management - Spring 2022
+## Week04 Lab01 Mon
+### Both .Rmd and .html files must be submitted by the end of class plus a 10 minute grace period. Any lab submitted after that 10 minute grace period will be deducted 2 points for being late. Labs submitted after the lab solution is posted will not be accepted; resulting in a 0 for that driver's lab.
+#### Only the driver should submit this assignment into their individual student repo. Save the filename as lab01-week04-section01-mon-netID.Rmd and render this file to .html. 
+
+
+**#1** (Syllabus, Markdown) Using Markdown syntax, make a numbered list with the first and last names of everyone at your station. Your name should appear in bold and italic text.  
+
+**Answer:**
+
+**#2** (Dropping missing values, Markdown)
+
+statement: Unknown values must be considered missing when they are represented as "unknown".
+
+If the statement is true, then write TRUE below in all caps. Otherwise write FALSE in all caps.
+
+**Answer:**
+
+**#3** (Accessing and importing data) Import Market at the Square Vendor Products Data using one programming language software and the data URL https://data.urbanaillinois.us/api/views/6gtk-bwms/rows.csv?accessType=DOWNLOAD. No need to consider tokenized URLs. Now, print the structure of the data. **This structure should match the data description below.** 
+
+  - The dataset (a .csv file) contains 1185 rows and 15 columns. The Market at the Square is a seasonal farmer's market where vendors sell vegetables, fruits, meat, and other products. Some vendors may sell non-food items such as arts and crafts. Other vendors are there to promote their organization such as political orgs, candidates, and religious groups. The data contains a listing of products sold by different vendors and with month-by-month details on which products are available, where the availability is Yes or No.
+
+**Answer:**
+
+```{r prob3}
+
+```
+
+**#4** (Data reduction, Data expansion) Beginning with the imported data in **Problem 3**, create a new data object named "jewels" that does the following in this order:
+
+- mutates a new column called "Varieties10", which equals 1 if the number of Varieties is between 1-10, equals 2 if the number of Varieties is between 11-20,..., equals $n$ if the number of Varieties is between $(n\cdot10-9)-(n\cdot10)$,
+
+- de-selects all columns that are named as months of the year
+
+- filters to include only Jewelry Products
+
+Now, print the resulting "jewels" data.
+
+**Answer:**
+
+```{r prob4}
+
+```
+
+**#5** (Reshaping data) Reshape the imported data in Problem **3** such that the columns named as the 12 months of the year become one single column named "Months" with their corresponding Yes or No values named as "Availability". Print the first 10 rows of the reshaped data.
+
+**Answer:**
+
+```{r prob5}
+
+```

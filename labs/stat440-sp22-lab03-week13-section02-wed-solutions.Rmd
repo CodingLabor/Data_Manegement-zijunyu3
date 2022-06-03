@@ -1,0 +1,146 @@
+---
+output: html_document
+runtime: shiny
+---
+# STAT 440 Statistical Data Management - Spring 2022
+## Week13 Lab03 Section 02 Wed
+### Both .Rmd and .html files must be submitted by the end of class plus a 10 minute grace period. Any lab submitted after that 10 minute grace period will be deducted 2 points for being late. Labs submitted after the lab solution is posted will not be accepted; resulting in a 0 for that driver's lab.
+#### Only the driver should submit this assignment into their individual student repo. Save the filename as lab03-week13-section02-wed-netID.Rmd and render this file to .html. 
+
+
+**#1** This problem includes concepts from the following notes: Markdown. 
+
+**Problem:** Using Markdown syntax, make a numbered list with the first and last names of everyone at your station. Your netID should appear in all lowercase text.
+
+**Answer:** Answers will vary. A numbered list includes numbers followed by period. Sample below.
+
+1. drivernetid
+
+2. Passenger Name
+
+**#2** This problem includes concepts from the following notes/videos: Shiny apps and dashboards, Markdown. 
+
+**Problem:** If the statement below is TRUE, then write TRUE in the **Answer** section and provide evidence (code and results) that it is TRUE. If the statement below is FALSE, then write FALSE in the **Answer** section and provide evidence (code and results) that it is FALSE.
+
+- Statement: The `renderPrint()` function renders a print from a reactive value.
+
+**Answer:** TRUE
+
+```{r prob2}
+library(shiny)
+ui <- fluidPage(
+  
+  # Sidebar with a slider input for number of bins 
+  textInput(inputId = "question",
+              label = "Please write your thoughts here:"
+              ), #the comma is important
+  
+  # Show a plot of the generated distribution
+  verbatimTextOutput(outputId = "answer")
+)
+
+# Define server logic required to draw a histogram
+server <- function(input, output) {
+  
+  output$answer <- renderPrint({
+    print(input$question)
+  })
+}
+
+# Run the application 
+shinyApp(ui = ui, server = server, options = list(height = 500))
+```
+
+**#3** This problem includes concepts from the following notes: Accessing and importing data, SQL for weeks 03-07 content, SQL sub-queries.
+
+**Problem:** Import the Chicago Public Chauffeurs Data using its URL https://uofi.box.com/shared/static/4qcdq6qtofbtn3m7ifrnxaahzv6x1x0r.csv and print the last 10 rows using SQL.
+
+- Chicago Public Chauffeurs Data description: The dataset contains 22752 rows and 12 columns. The subjects are public chauffeurs in business in Chicago with licenses and various vehicle types. Original source is City of Chicago.
+
+**Answer:**
+
+```{r prob3}
+library(tidyverse)
+cpc <- read_csv("https://uofi.box.com/shared/static/4qcdq6qtofbtn3m7ifrnxaahzv6x1x0r.csv", 
+    col_types = cols(Renewed = col_date(format = "%m/%Y"), 
+        `Status Date` = col_date(format = "%m/%d/%Y"), 
+        Expires = col_date(format = "%m/%Y"), 
+        `Original Issue Date` = col_date(format = "%m/%d/%Y")))
+
+library(sqldf)
+sqldf("
+      SELECT *
+      FROM cpc
+      LIMIT 10 OFFSET 22742
+      ")
+```
+
+**#4**  This problem includes concepts from the following notes/videos: Arranging data, Data reduction, Data expansion, Vectorization, Regular expressions and string manipulation, Summarizing data, Combining data, SQL for weeks 03-07 content, SQL sub-queries, Tool-making and programming Part01, Data visualization using base R, Data visualization using Tidyverse, Shiny apps and dashboards.
+
+**Problem:** Use the data imported in **Problem 3** to create a data visualization, specifically a text plot, containing the average number of months served for each driver type.
+
+**Answer:**
+
+```{r prob4}
+x <- cpc %>%
+  group_by(`Driver Type`) %>%
+  summarise(AvgMonthsServed = as.vector(mean(difftime(Expires,`Original Issue Date`,"days")/30, na.rm = TRUE)) )
+
+plot(1:6,1:6, axes = FALSE, type = "n", frame.plot = FALSE, xlab = "", ylab = "", main = "Chicago Public Chauffeurs: Avg Months Served per Driver Type")
+text(rep(c(2,4),2), c(rep(5,2),rep(2,2)), labels = round(x$AvgMonthsServed,1), cex = 3)
+text(rep(c(2,4),2), c(rep(4,2),rep(1,2)), labels = x$`Driver Type`, cex = 1)
+```
+
+**#5** This problem includes concepts from the following notes/videos: Arranging data, Data reduction, Data expansion, Vectorization, Regular expressions and string manipulation, Summarizing data, Combining data, SQL for weeks 03-07 content, SQL sub-queries, Tool-making and programming Part01, Data visualization using base R, Data visualization using Tidyverse, Shiny apps and dashboards.
+
+**Problem:** Create a Shiny dashboard that shows the text plot in the previous problem and allows users to change both the sex and license type which will cause the data visualization to change counts based on the user's selections of sex and license type.
+
+**Answer:**
+
+```{r prob5}
+#Shiny Dashboard
+library(shinydashboard)
+
+ui <- dashboardPage(
+  dashboardHeader(title = "Chicago Public Chauffeurs Data"),
+  dashboardSidebar(),
+  dashboardBody(
+    # Boxes need to be put in a row (or column)
+    fluidRow(
+      box(plotOutput("textPlot", height = 250)),
+
+      box(
+        title = "Controls1",
+        selectInput("licensetypes", "Choose a license type:",
+      list(`License Types` = sort(unique(cpc$`License Type`))  ))
+      ),
+      
+      box(
+        title = "Controls2",
+        selectInput("sexes", "Choose a sex:",
+               list(`Sexes` = sort(unique(cpc$Sex))))
+      )
+    )
+  )
+)
+
+server <- function(input, output) {
+
+    output$textPlot <- renderPlot({
+        # generate counts based on input$bookingdates from ui.R
+        x <- cpc %>%
+            filter(Sex == input$sexes, `License Type` == input$licensetypes) %>%
+          group_by(`Driver Type`) %>%
+  summarise(AvgMonthsServed = as.vector(mean(difftime(Expires,`Original Issue Date`,"days")/30, na.rm = TRUE)) )
+        
+        # draw the text plot
+
+        plot(1:6,1:6, axes = FALSE, type = "n", frame.plot = FALSE, xlab = "", ylab = "", main = "Avg Months Served per Driver Type for Selected Sex and License Type")
+        text(rep(c(2,4),2)[1:nrow(x)], c(rep(5,2),rep(2,2))[1:nrow(x)], labels = round(x$AvgMonthsServed,1)[1:nrow(x)], cex = 3)
+        text(rep(c(2,4),2)[1:nrow(x)], c(rep(4,2),rep(1,2))[1:nrow(x)], labels = x$`Driver Type`[1:nrow(x)], cex = 1)
+
+    })
+}
+
+shinyApp(ui, server)
+```

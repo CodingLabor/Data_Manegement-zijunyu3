@@ -1,0 +1,70 @@
+# STAT 440 Statistical Data Management - Spring 2022
+## Week03 Lab01 Mon
+### Both .Rmd and .html files must be submitted by the end of class plus a 10 minute grace period. Any lab submitted after that 10 minute grace period will be deducted 2 points for being late. Labs submitted after the lab solution is posted will not be accepted; resulting in a 0 for that driver's lab.
+#### Only the driver should submit this assignment into their individual student repo. Save the filename as lab01-week03-section02-mon-netID.Rmd and render this file to .html. 
+
+**#1** (Syllabus, Markdown) Using Markdown syntax, make a numbered list with the first and last names of everyone at your station. Your name should appear in bold text.
+
+**Answer:** Answers will vary, but must be a proper list with Driver's name in bold text.
+
+**#2** (Accessing and importing data, Markdown)
+
+statement: When importing a semi-structured dataset, we can use RStudio's Import Dataset Wizard.
+
+If the statement is true, then write TRUE below in all caps. Otherwise write FALSE in all caps.
+
+**Answer:** FALSE
+
+**#3** (Accessing and importing data, Handling dates and times) Import the Urbana Police Incidents Data using its URL https://uofi.box.com/shared/static/uxk757wno4yzqyqtrahwzvckjvs9ulmn, print the structure of the data, and ensure the 6 dates and times columns are formatted properly as dates and times in R respectively. This structure should match the data description below.  
+
+  - The dataset (a file with no extension) contains the 8015 police incidents in the year 2021 with 31 variables ("columns") per incident. The columns cover the details of the incident and associated crime including dates, times, locations, crime descriptions, and conclusions of the incident. The original source is the City of Urbana.
+
+**Answer:**
+
+```{r problem3}
+library(tidyverse)
+police <- read_csv("https://uofi.box.com/shared/static/uxk757wno4yzqyqtrahwzvckjvs9ulmn", 
+    col_types = cols(`DATE OCCURRED` = col_date(format = "%m&%d&%Y"), 
+        `TIME OCCURRED` = col_time(format = "%H:%M"), 
+        `DATE REPORTED` = col_date(format = "%m/%d/%Y"), 
+        `TIME REPORTED` = col_time(format = "%H:%M"), 
+        `DATE ARRIVED` = col_date(format = "%m-%d-%Y"), 
+        `TIME ARRIVED` = col_time(format = "%H:%M")))
+str(police)
+```
+
+**#4** (Accessing and importing data) Import the Rental Inspection Grades Listing Data using its URL https://uofi.box.com/shared/static/xn1vf7d5w510n8v7sborpnimlbc2r32p.txt, print the structure of the data, and ensure the 2 dates columns are formatted properly as dates in R. This structure should match the data description below.   
+
+  - The dataset (a .txt file) contains the 1738 rental properties in Urbana with 7 variables ("columns") per property which includes details about the parcel number, address, grade, inspection date, and more. The rental properties are inspected on a rotating basis and can receive a letter grade of A, B, C, D, F, and N. The best grade is A. The original source is the City of Urbana.
+
+**Answer:**
+
+```{r problem4}
+rental <- read_csv("https://uofi.box.com/shared/static/xn1vf7d5w510n8v7sborpnimlbc2r32p.txt", 
+    col_types = cols(`Inspection Date` = col_date(format = "%m/%d/%Y"), 
+        `Expiration Date` = col_date(format = "%m/%d/%Y")))
+str(rental)
+```
+
+**#5** (Accessing and importing data via web scraping) Web scrape the Champaign County Assessor's [website](https://champaignil.devnetwedge.com/) to extract a property's Township Assessor's Total. Extract this value for the first 5 properties imported in **Problem 4** and print the resulting 5 values.
+
+**Answer:**
+
+```{r prob5}
+library(rvest)
+ 
+prop_url <- paste0("https://champaignil.devnetwedge.com/parcel/view/",rental$`Parcel Number`,"/2021")
+
+TA_total <- rep(0, length(prop_url))
+
+for (i in 1:5){ 
+  if(length(html_text(html_nodes(read_html(prop_url[i]), ".text-right:nth-child(4) td:nth-child(7)"),trim=TRUE))==0){
+    TA_total[i] <- NA
+  }
+    else{
+  TA_total[i] <- html_text(html_nodes(read_html(prop_url[i]),".text-right:nth-child(4) td:nth-child(7)"),trim=TRUE)
+    }
+}
+
+head(TA_total,5)
+```

@@ -1,0 +1,45 @@
+# STAT 440 Statistical Data Management - Spring 2022
+## Week05 Lab01 Mon
+### Both .Rmd and .html files must be submitted by the end of class plus a 10 minute grace period. Any lab submitted after that 10 minute grace period will be deducted 2 points for being late. Labs submitted after the lab solution is posted will not be accepted; resulting in a 0 for that driver's lab.
+#### Only the driver should submit this assignment into their individual student repo. Save the filename as lab01-week05-section02-mon-netID.Rmd and render this file to .html. 
+
+
+**#1** (Syllabus, Markdown) Using Markdown syntax, make a numbered list with the first and last names of everyone at your station. Your name should appear in all lowercase text.
+
+**Answer:** 
+
+**#2** (Vectorization, Markdown)
+
+statement: R's `+` operation is a **vectorized** operation. 
+
+If the text in bold (within the statement above) is the word or phrase that makes the statement true, then write TRUE below in all caps. If the text in bold (within the statement above) is the word or phrase that makes the statement false, then write FALSE below in all caps followed by the correct term in bold text. For example, FALSE **newword** 
+
+**Answer:**
+
+**#3** (Accessing and importing data) Import Market at the Square Vendor Products Data using its URL https://uofi.box.com/shared/static/7kvfgl6x7r5m2lrjqz771msw2iovwa7o.csv and print the structure of the data.
+
+Market at the Square Vendor Products Data descrition: The dataset contains 1185 rows and 15 columns. The Market at the Square is a seasonal farmer's market where vendors sell vegetables, fruits, meat, and other products. Some vendors may sell non-food items such as arts and crafts. Other vendors are there to promote their organization such as political orgs, candidates, and religious groups. The data contains a listing of products sold by different vendors and with month-by-month details on which products are available, where the availability is Yes or No.
+
+**Answer:**
+
+```{r}
+
+```
+
+**#4** (Loops and conditional execution, Apply family of functions, Vectorization) Beginning with the imported data in **Problem 3**, apply data management concepts to answer the following question(s) in Markdown syntax and complete sentence(s) (excluding `group_by()` and similar functions beyond the current week of concepts):
+
+- Among the first 10 product categories, what is the average number of varieties for each product category?
+
+**Answer:** 
+
+```{r}
+
+```
+
+**#5** (Loops and conditional execution, Apply family of functions, Vectorization) Reshape the imported data in **Problem 3** such that the columns named as the 12 months of the year become one single column named "Months" with their corresponding Yes or No values named as "Availability". Print the first 13 rows of the reshaped data. **You cannot use pivot_wider/longer functions.**
+
+**Answer:**
+
+```{r}
+
+```

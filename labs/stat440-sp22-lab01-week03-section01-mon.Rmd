@@ -1,0 +1,32 @@
+# STAT 440 Statistical Data Management - Spring 2022
+## Week03 Lab01 Mon
+### Both .Rmd and .html files must be submitted by the end of class plus a 10 minute grace period. Any lab submitted after that 10 minute grace period will be deducted 2 points for being late. Labs submitted after the lab solution is posted will not be accepted; resulting in a 0 for that driver's lab.
+#### Only the driver should submit this assignment into their individual student repo. Save the filename as lab01-week03-section01-mon-netID.Rmd and render this file to .html. 
+
+**#1** (Syllabus, Markdown) Using Markdown syntax, make a numbered list with the first and last names of everyone at your station. Your name should appear in bold text.
+
+**Answer:**
+
+**#2** (Structures of data, delimiters, and file extensions, Markdown)
+
+statement: Ampersands can be used as delimiters in a data file.
+
+If the statement is true, then write TRUE below in all caps. Otherwise write FALSE in all caps.
+
+**Answer:**
+
+**#3** (Accessing and importing data) Import the Champaign County Sheriff Office & Jail Data (CCSO) using its URL https://uofi.box.com/shared/static/b6kuknulot4bqyo7elc8gmm6qzhnk766.dat, print the structure of the data, and ensure the 4 dates and times columns are formatted properly as dates and times in R respectively. 
+
+  - The dataset (a .dat file) contains over 11082 observations and 40 columns for individuals who were booked into jail in Champaign County. The individuals are not identifiable based on personal identity, but they are given unique jacket numbers. Some rows in the data appear more than once because of multiple crimes being assigned to one person. But there is also the possibility of there being recidivists. A recidivist is a person who goes to jail repeatedly (more than one datetime). The demographics of the people, reasons for being booked, and crime code are also given in the data. The original source is CCSO.
+
+**Answer:**
+
+**#4** (Accessing and importing data) Import the Rental Inspection Grades Listing Data using its data URL https://uofi.box.com/shared/static/p77y8h54onufgt17khhtctgj13pjcqrf.csv, print the structure of the data, and ensure the 2 dates columns are formatted properly as dates in R. This structure should match the data description below.  
+
+  - The dataset (a .csv file) contains the 1738 rental properties in Urbana with 7 variables ("columns") per property which includes details about the parcel number, address, grade, inspection date, and more. The rental properties are inspected on a rotating basis and can receive a letter grade of A, B, C, D, F, and N. The best grade is A. The original source is the City of Urbana.
+
+**Answer:**
+
+**#5** (Accessing and importing data via web scraping) Web scrape the Champaign County Assessor's [website](https://champaignil.devnetwedge.com/) to extract a property's Legal Description. Extract this value for the first 5 properties imported in **Problem 4** and print the resulting 5 values.
+
+**Answer:**

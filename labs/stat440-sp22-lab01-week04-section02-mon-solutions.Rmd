@@ -1,0 +1,127 @@
+# STAT 440 Statistical Data Management - Spring 2022
+## Week04 Lab01 Mon
+### Both .Rmd and .html files must be submitted by the end of class plus a 10 minute grace period. Any lab submitted after that 10 minute grace period will be deducted 2 points for being late. Labs submitted after the lab solution is posted will not be accepted; resulting in a 0 for that driver's lab.
+#### Only the driver should submit this assignment into their individual student repo. Save the filename as lab01-week04-section02-mon-netID.Rmd and render this file to .html. 
+
+**#1** (Syllabus, Markdown) Using Markdown syntax, make a numbered list with the first and last names of everyone at your station. Your name should appear in italic text.
+
+**Answer:** Answers will vary, but must be a proper list with Driver's name in italic text.
+
+**#2** (Arranging data, Markdown)
+
+statement: Arranging data can be described in two ways: organizing columns and reshaping data.
+
+If the statement is true, then write TRUE below in all caps. Otherwise write FALSE in all caps.
+
+**Answer:** FALSE
+
+**#3** (Accessing and importing data) Import the Champaign County Sheriff Office & Jail Data (CCSO) using its URL https://uofi.box.com/shared/static/b6kuknulot4bqyo7elc8gmm6qzhnk766.dat, print the structure of the data, and ensure the 4 dates and times columns are formatted properly as dates and times in R respectively. 
+
+  - The dataset (a .dat file) contains over 11082 observations and 40 columns for individuals who were booked into jail in Champaign County. The individuals are not identifiable based on personal identity, but they are given unique jacket numbers. Some rows in the data appear more than once because of multiple crimes being assigned to one person. But there is also the possibility of there being recidivists. A recidivist is a person who goes to jail repeatedly (more than one datetime). The demographics of the people, reasons for being booked, and crime code are also given in the data. The original source is CCSO.
+
+**Answer:**
+
+```{r prob3}
+library(tidyverse)
+ccso <- read_csv("https://uofi.box.com/shared/static/b6kuknulot4bqyo7elc8gmm6qzhnk766.dat", 
+    col_types = cols(booking_date = col_date(format = "%m/%d/%Y"), 
+        booking_time = col_time(format = "%H:%M:%S"), 
+        released_date = col_date(format = "%m/%d/%Y"), 
+        released_time = col_time(format = "%H:%M:%S")))
+str(ccso)
+```
+
+**#4** (Data reduction, Data expansion) Beginning with the data imported in **Problem 3**, create a new data object named "cu_jail" that does the following in this order:
+
+- mutates a new column called "minutes" which converts the "hours" spent in jail to minutes
+
+- selects the following columns: "booking_number", "booking_date", "booking_time", "jacket_number", "released_date", "released_time", "hours", "minutes", "city", "race", "sex", "release reason description"
+
+- filters the cities of residence to be "CHAMPAIGN" or "URBANA"
+
+- arranges data by "hours" in descending order
+
+Now, print the last 10 rows of the resulting "cu_jail" data.
+
+**Answer:**
+
+```{r prob4}
+cu_jail <- ccso %>%
+  mutate(minutes = hours*60) %>%
+  select(booking_number, booking_date, booking_time, jacket_number, released_date, released_time, hours, minutes, city, race, sex, `release reason description`) %>%
+  filter(city=="CHAMPAIGN" | city=="URBANA") %>%
+  arrange(desc(hours))
+ 
+slice_tail(cu_jail,n=10)
+```
+
+**#5** (Data reduction, Data expansion) Beginning with the data imported in **Problem 3**, apply data management concepts to answer the following question in Markdown syntax and complete sentence(s):
+
+1. Which midwestern state of residence was most represented in the data? The Bureau of Labor Statistics considers these states to be midwestern: 
+
+- Illinois  
+- Indiana  
+- Iowa  
+- Kansas  
+- Michigan  
+- Minnesota  
+- Missouri  
+- Nebraska  
+- North Dakota  
+- Ohio  
+- South Dakota  
+- Wisconsin  
+
+**You must answer in Markdown syntax in a complete sentence and show code as evidence of your answer.**
+
+**Answer:** Illinois is the most represented midwestern state in the data.
+
+```{r prob5}
+ccso %>%
+  filter(state=="ILLINOIS") %>%
+  nrow()
+
+ccso %>%
+  filter(state=="INDIANA") %>%
+  nrow()
+
+ccso %>%
+  filter(state=="IOWA") %>%
+  nrow()
+
+ccso %>%
+  filter(state=="KANSAS") %>%
+  nrow()
+
+ccso %>%
+  filter(state=="MICHIGAN") %>%
+  nrow()
+
+ccso %>%
+  filter(state=="MINNESOTA") %>%
+  nrow()
+
+ccso %>%
+  filter(state=="MISSOURI") %>%
+  nrow()
+
+ccso %>%
+  filter(state=="NEBRASKA") %>%
+  nrow()
+
+ccso %>%
+  filter(state=="NORTH DAKOTA") %>%
+  nrow()
+
+ccso %>%
+  filter(state=="OHIO") %>%
+  nrow()
+
+ccso %>%
+  filter(state=="SOUTH DAKOTA") %>%
+  nrow()
+
+ccso %>%
+  filter(state=="WISCONSIN") %>%
+  nrow()
+```

@@ -1,0 +1,76 @@
+# STAT 440 Statistical Data Management - Spring 2022
+## Week03 Lab01 Wed
+### Both .Rmd and .html files must be submitted by the end of class plus a 10 minute grace period. Any lab submitted after that 10 minute grace period will be deducted 2 points for being late. Labs submitted after the lab solution is posted will not be accepted; resulting in a 0 for that driver's lab.
+#### Only the driver should submit this assignment into their individual student repo. Save the filename as lab01-week03-section02-wed-netID.Rmd and render this file to .html. 
+
+**#1** (Syllabus, Markdown) Using Markdown syntax, make a numbered list with the first and last names of everyone at your station. Your name should appear in bold text.
+
+**Answer:** Answers will vary, but must be a proper list with Driver's name in bold text.
+
+**#2** (Accessing and importing data, Markdown)
+
+statement: When importing a semi-structured dataset, we can use RStudio's Import Dataset Wizard.
+
+If the statement is true, then write TRUE below in all caps. Otherwise write FALSE in all caps.
+
+**Answer:** FALSE
+
+**#3** (Accessing and importing data) Import the Urbana Community Development Permits Issued Data using its URL https://uofi.box.com/shared/static/l5azidzmgnnhh6xyhs2ngchpum5uu5bg.csv such that your resulting data structure matches the structure in the image below. **You must print the structure of your data.**  
+
+![img03](https://uofi.box.com/shared/static/jxnhuivpgo10fl0xztgqquxk9avn0a9l.png)
+
+**Answer:**
+
+```{r problem3}
+library(tidyverse)
+permit <- read_csv("https://uofi.box.com/shared/static/l5azidzmgnnhh6xyhs2ngchpum5uu5bg.csv", 
+    col_types = cols(`Issue Date` = col_date(format = "%m/%d/%Y")))
+str(permit)
+```
+
+**#4** (Accessing and importing data) Import the Rental Inspection Grades Listing Data using its URL https://data.urbanaillinois.us/api/views/tn7v-fm2b/rows.csv?accessType=DOWNLOAD, print the structure of the data, and ensure the 2 dates columns are formatted properly as dates in R. This structure should match the data description below.   
+
+![img04](https://uofi.box.com/shared/static/yzgflvcfiv4frkk01hupbvscmitcs29y.png)
+
+**Answer:**
+
+```{r problem4}
+rental <- read_csv("https://data.urbanaillinois.us/api/views/tn7v-fm2b/rows.csv?accessType=DOWNLOAD", 
+    col_types = cols(`Inspection Date` = col_date(format = "%m/%d/%Y"), 
+        `Expiration Date` = col_date(format = "%m/%d/%Y")))
+str(rental)
+```
+
+**#5** (Accessing and importing data via web scraping, Markdown) Select all of the following properties that had a Board of Review level of assessment larger than 50,000:
+
+a. 922117132002
+
+b. 922116306002
+
+c. 912108352008
+
+d. 922116108008
+
+e. 912107280008
+
+Web scrape the Champaign County Assessor's [website](https://champaignil.devnetwedge.com/) for these properties and print results to show evidence of your answer.
+
+**Answer:** Property a had a Board of Review level of assessment larger than 50,000.
+
+```{r prob5}
+library(rvest)
+
+pns <- c(922117132002,922116306002,912108352008,922116108008,912107280008)
+
+prop_url <- paste0("https://champaignil.devnetwedge.com/parcel/view/",pns,"/2021")
+
+board <- rep(NA, length(prop_url))
+
+board[1] <- html_text(html_nodes(read_html(prop_url[1]), ".text-right:nth-child(1) td:nth-child(7)"),trim=TRUE)
+board[2] <- html_text(html_nodes(read_html(prop_url[2]), ".text-right:nth-child(1) td:nth-child(7)"),trim=TRUE)
+board[3] <- html_text(html_nodes(read_html(prop_url[3]), ".text-right:nth-child(1) td:nth-child(7)"),trim=TRUE)
+board[4] <- html_text(html_nodes(read_html(prop_url[4]), ".text-right:nth-child(1) td:nth-child(7)"),trim=TRUE)
+board[5] <- html_text(html_nodes(read_html(prop_url[5]), ".text-right:nth-child(1) td:nth-child(7)"),trim=TRUE)
+
+board
+```

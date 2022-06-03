@@ -1,0 +1,102 @@
+# STAT 440 Statistical Data Management - Spring 2022
+## Week10 Lab02 Section 02 Wed
+### Both .Rmd and .html files must be submitted by the end of class plus a 10 minute grace period. Any lab submitted after that 10 minute grace period will be deducted 2 points for being late. Labs submitted after the lab solution is posted will not be accepted; resulting in a 0 for that driver's lab.
+#### Only the driver should submit this assignment into their individual student repo. Save the filename as lab02-week10-section02-wed-netID.Rmd and render this file to .html. 
+
+
+**#1** This problem includes concepts from the following notes: Markdown. 
+
+**Problem:** Using Markdown syntax, make a numbered list with the first and last names of everyone at your station, excluding yourself. Your netID should appear in all lowercase text as one item in the list.
+
+**Answer:** Answers will vary, but must be a proper list with Driver's netID in all lowercase text.
+
+**#2** This problem includes concepts from the following notes/videos: , Markdown. 
+
+**Problem:** If the statement below is TRUE, then write TRUE in the **Answer** section and provide evidence (code and results) that it is TRUE. If the statement below is FALSE, then write FALSE in the **Answer** section and provide evidence (code and results) that it is FALSE.
+
+- Statement: When using the `rename()` function in the Tidyverse, we place the old name on the left side of the `=` sign and the new name on the right side.
+
+**Answer:** FALSE  
+
+```{r prob2}
+library(tidyverse)
+library(jsonlite)
+
+dplyr::slice_head(select(rename(iris, SepalLength = Sepal.Length), SepalLength, Sepal.Width),n=10) 
+```
+
+**#3** This problem includes concepts from the following notes: Accessing and importing data.
+
+**Problem:** Import the 2020 NBA Season Data (four datasets total) using these four URLs https://uofi.box.com/shared/static/grgt4wkiumfjgpug3fsx2vfkipv5rxz1.json, https://uofi.box.com/shared/static/af959qr9ewjgain1obkzmagapkmw8wbj.json, https://uofi.box.com/shared/static/raqot999l9yo6qz26k13epitft9j2ay4.json, https://uofi.box.com/shared/static/gcyl1gya0qkoceg0vpydd26mpwczrs56.json, and print the resulting last 5 rows of each dataset.
+
+- Data description for the 4 NBA 2020 Season datasets: The dataset (four .json files) contains a total of 540 unique observations and 26 columns. The observations are professional basketball players in the National Basketball Association (NBA) and their season statistics for the 2020-2021 season. A stint is the duration of time someone worked for a particular employer. In this basketball data, a stint is a number representing the time a player was with a particular team. Some players are traded during the season, which means they would have more than 1 stint. A player's basketball statistics start over for each stint they have in a season. There are 540 unique player IDs across all stints. The original source is the NBA and Sports Reference. Also see the [2020 NBA Data Key](https://uofi.box.com/shared/static/oe2bbjn0xyhs9azbxaz00ab5ua6nbr9r.pdf).
+
+**Answer:**
+
+```{r prob3}
+nba1 <- fromJSON("https://uofi.box.com/shared/static/grgt4wkiumfjgpug3fsx2vfkipv5rxz1.json")
+nba2 <- fromJSON("https://uofi.box.com/shared/static/af959qr9ewjgain1obkzmagapkmw8wbj.json")
+nba3 <- fromJSON("https://uofi.box.com/shared/static/raqot999l9yo6qz26k13epitft9j2ay4.json")
+nba4 <- fromJSON("https://uofi.box.com/shared/static/gcyl1gya0qkoceg0vpydd26mpwczrs56.json") #importing JSON data
+
+slice_tail(nba1,n=5) #print last 5 rows
+slice_tail(nba2,n=5) #print last 5 rows
+slice_tail(nba3,n=5) #print last 5 rows
+slice_tail(nba4,n=5) #print last 5 rows
+```
+
+**#4** This problem includes concepts from the following notes: Accessing and importing data, Arranging data, Data reduction, Data expansion, Vectorization, Regular expression and string manipulation, Summarizing data, Validating data, Cleaning data, Markdown.
+
+**Problem:** Beginning with the imported data and address the following (in this order) using any data management concepts:
+
+  - use string manipulation to clean the PlayerID and PlayerName columns in the fourth NBA data set that was imported in **Problem 3**; these cleaned columns should be similar in to the columns in the other three NBA datasets
+
+  - combine the four data sets into a new object called "nba2020"
+
+  - summarize the data such that all basketball statistics are totaled across all stints per player; there should only be 540 players after summarizing; use the final stint's Position, Age, and Team for each player
+
+  - rename the TRB column to be called "REBOUNDS" that represents a combination of offensive rebounds and defensive rebounds
+
+  - mutate a new column called "PIR" that represents an alternative Performance Index Rating using the formula 
+  $$(Points + Total Rebounds + Assists + Steals + Blocks) - (Missed Field Goals + Missed Free Throws + Turnovers + Personal Fouls)$$
+
+  - de-select the stint column
+
+- Now, print the structure of the resulting "nba2020" data object.
+
+- Data description for the 4 NBA 2020 Season datasets: The dataset (four .json files) contains a total of 540 unique observations and 26 columns. The observations are professional basketball players in the National Basketball Association (NBA) and their season statistics for the 2020-2021 season. A stint is the duration of time someone worked for a particular employer. In this basketball data, a stint is a number representing the time a player was with a particular team. Some players are traded during the season, which means they would have more than 1 stint. A player's basketball statistics start over for each stint they have in a season. There are 540 unique player IDs across all stints. The original source is the NBA and Sports Reference. Also see the [2020 NBA Data Key](https://uofi.box.com/shared/static/oe2bbjn0xyhs9azbxaz00ab5ua6nbr9r.pdf).
+
+**Answer:** 
+
+```{r prob4}
+nba42 <- nba4 %>%
+  mutate(PlayerName = str_split(str_replace_all(Player,"\\\\","&"), "\\&", simplify=TRUE)[,1], PlayerID = str_split(str_replace_all(Player,"\\\\","&"), "\\&", simplify=TRUE)[,2]) %>%
+  select(PlayerID, PlayerName, everything(), -Player)
+
+nba2020 <- bind_rows(nba42, nba3, nba2, nba1)
+nba20202 <- nba2020 %>%
+  group_by(PlayerID) %>%
+  arrange(PlayerID) %>%
+  mutate(G2=sum(G),GS2=sum(GS),MP2=sum(MP),FG2=sum(FG),FGA2=sum(FGA),`3P2`=sum(`3P`),`3PA2`=sum(`3PA`),`2P2`=sum(`2P`),`2PA2`=sum(`2PA`),FT2=sum(FT),FTA2=sum(FTA),ORB2=sum(ORB),DRB2=sum(DRB),TRB2=sum(TRB),AST2=sum(AST),STL2=sum(STL),BLK2=sum(BLK),TOV2=sum(TOV),PF2=sum(PF),PTS2=sum(PTS)) %>%
+  distinct(PlayerID,.keep_all = TRUE) %>%
+  select(-(G:PTS),-stint) %>%
+  rename(REBOUNDS=TRB2) %>%
+  mutate(PIR = (PTS2+REBOUNDS+AST2+STL2+BLK2)-((FGA2-FG2)+(FTA2-FT2)+TOV2+PF2) )
+
+str(nba20202)
+```
+
+**#5** This problem includes concepts from the following notes: Accessing and importing data, Arranging data, Data reduction, Data expansion, Vectorization, Regular expressions and string manipulation, Summarizing data, Cleaning data, Markdown.
+
+**Problem:** Using the 2020 Season NBA Data (**imported in Problem 3**), apply data management concepts to answer the following question:
+
+- **Which (if any) of the 15 players with the highest Performance Index Rating made the 2020 US Olympic Basketball Team?** Write your answer in the **Answer** section below in Markdown syntax with complete sentence(s) and show code and result as evidence. This link https://www.usab.com/mens/national-team/roster.aspx may be of assistance in identifying 2020 US Olympic Men's Basketball Team.
+
+**Answer:** Three players in this list of highest PIR made the 2020 US Men's Basketball Team: Adebayo, Lillard, and Tatum.
+
+```{r prob5}
+nba20202 %>%
+  select(PlayerName, PlayerID, Pos, Tm, Age, PIR) %>%
+  arrange(desc(PIR)) %>%
+  head(15)
+```

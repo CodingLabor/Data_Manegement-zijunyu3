@@ -1,0 +1,183 @@
+# STAT 440 Statistical Data Management - Spring 2022
+## Week13 Lab03 Section 01 Mon
+### Both .Rmd and .html files must be submitted by the end of class plus a 10 minute grace period. Any lab submitted after that 10 minute grace period will be deducted 2 points for being late. Labs submitted after the lab solution is posted will not be accepted; resulting in a 0 for that driver's lab.
+#### Only the driver should submit this assignment into their individual student repo. Save the filename as lab03-week13-section01-mon-netID.Rmd and render this file to .html. 
+
+
+**#1** This problem includes concepts from the following notes: Markdown. 
+
+**Problem:** Using Markdown syntax, make a numbered list with the first and last names of everyone at your station. Your netID should appear in all lowercase text.
+
+**Answer:** Answers will vary. A numbered list includes numbers followed by period. Sample below.
+
+1. drivernetid
+
+2. Passenger Name
+
+**#2** This problem includes concepts from the following notes/videos: Shiny apps and dashboards, Markdown. 
+
+**Problem:** If the statement below is TRUE, then write TRUE in the **Answer** section and provide evidence (code and results) that it is TRUE. If the statement below is FALSE, then write FALSE in the **Answer** section and provide evidence (code and results) that it is FALSE.
+
+- Statement: There is no difference between a Shiny app and a Shiny dashboard. 
+
+**Answer:** FALSE. The differences are subtle and minute, but still different.
+
+```{r prob2app}
+#Shiny App
+library(shiny)
+
+# Define UI for application that draws a histogram
+ui <- fluidPage(
+
+    # Application title
+    titlePanel("Old Faithful Geyser Data"),
+
+    # Sidebar with a slider input for number of bins 
+    sidebarLayout(
+        sidebarPanel(
+            sliderInput("bins",
+                        "Number of bins:",
+                        min = 1,
+                        max = 50,
+                        value = 30)
+        ),
+
+        # Show a plot of the generated distribution
+        mainPanel(
+           plotOutput("distPlot")
+        )
+    )
+)
+
+# Define server logic required to draw a histogram
+server <- function(input, output) {
+
+    output$distPlot <- renderPlot({
+        # generate bins based on input$bins from ui.R
+        x    <- faithful[, 2]
+        bins0 <- seq(min(x), max(x), length.out = input$bins + 1)
+
+        # draw the histogram with the specified number of bins
+        hist(x, breaks = bins0, col = 'darkgray', border = 'white', main = "Histogram of Waiting Times to Next Eruption", xlab="(in Minutes)")
+    })
+}
+
+# Run the application 
+shinyApp(ui = ui, server = server)
+```
+
+```{r prob2dashboard}
+#Shiny Dashboard
+library(shinydashboard)
+
+ui <- dashboardPage(
+  dashboardHeader(title = "Old Faithful Geyser Data"),
+  dashboardSidebar(),
+  dashboardBody(
+    # Boxes need to be put in a row (or column)
+    fluidRow(
+      box(plotOutput("distPlot", height = 250)),
+
+      box(
+        title = "Controls",
+        sliderInput("bins",
+                        "Number of bins:",
+                        min = 1,
+                        max = 50,
+                        value = 30)
+      )
+    )
+  )
+)
+
+server <- function(input, output) {
+
+    output$distPlot <- renderPlot({
+        # generate bins based on input$bins from ui.R
+        x    <- faithful[, 2]
+        bins0 <- seq(min(x), max(x), length.out = input$bins + 1)
+
+        # draw the histogram with the specified number of bins
+        hist(x, breaks = bins0, col = 'darkgray', border = 'white', main = "Histogram of Waiting Times to Next Eruption", xlab="(in Minutes)")
+    })
+}
+
+shinyApp(ui, server)
+```
+
+
+**#3** This problem includes concepts from the following notes: Accessing and importing data.
+
+**Problem:** Import the Champaign County Sheriff Office & Jail Data and its data URL https://uofi.box.com/shared/static/b6kuknulot4bqyo7elc8gmm6qzhnk766.dat and print the resulting structure of the data. **SQL not required.**
+
+- Data description for Champaign County Sheriff Office & Jail Data: The dataset contains 11082 observations and 40 columns for individuals who were booked into jail in Champaign County Jail. The individuals are identifiable based on personal identity, and they are given unique jacket numbers. Some rows in the data appear more than once because of multiple crimes being assigned to one person. But there is also the possibility of there being recidivists. A recidivist is a person who goes to jail repeatedly (more than one datetime). The demographics of the people, reasons for being booked, and crime code are also given in the data. The original source is the Champaign County Sheriff Office & Jail (CCSO).
+
+**Answer:**
+
+```{r prob3}
+library(tidyverse)
+jail <- read_csv("https://uofi.box.com/shared/static/b6kuknulot4bqyo7elc8gmm6qzhnk766.dat", 
+    col_types = cols(booking_date = col_date(format = "%m/%d/%Y"), 
+        booking_time = col_time(format = "%H:%M:%S"), 
+        released_date = col_date(format = "%m/%d/%Y"), 
+        released_time = col_time(format = "%H:%M:%S")))
+str(jail)
+```
+
+**#4**  This problem includes concepts from the following notes/videos: Arranging data, Data reduction, Data expansion, Vectorization, Regular expressions and string manipulation, Summarizing data, Combining data, SQL for weeks 03-07 content, SQL sub-queries, Tool-making and programming Part01, Data visualization using base R, Data visualization using Tidyverse, Shiny apps and dashboards.
+
+**Problem:** Use the data imported in **Problem 3** to create a data visualization, specifically a text plot, containing the counts of people booked into jail stratified by race.
+
+**Answer:**
+
+```{r prob4}
+x=table(jail$race)
+
+plot(1:7, 1:7, type = "n", axes = FALSE, frame.plot = FALSE, ylab = "", xlab = "Year 2019", main = "Champaign Co. Jail Booking Counts by Race")
+text(rep(c(2,4,6),2), c(rep(6,3),rep(3,3)), labels = unname(x), cex = 3)
+text(rep(c(2,4,6),2), c(rep(5,3),rep(2,3)), labels = names(x), cex = 1)
+```
+
+**#5** This problem includes concepts from the following notes/videos: Arranging data, Data reduction, Data expansion, Vectorization, Regular expressions and string manipulation, Summarizing data, Combining data, SQL for weeks 03-07 content, SQL sub-queries, Tool-making and programming Part01, Data visualization using base R, Data visualization using Tidyverse, Shiny apps and dashboards.
+
+**Problem:** Create a Shiny dashboard that shows the text plot in the previous problem and allows users to change the booking date which will cause the data visualization to change counts based on the user's date selection.
+
+**Answer:**
+
+```{r prob5}
+#Shiny Dashboard
+library(shinydashboard)
+
+ui <- dashboardPage(
+  dashboardHeader(title = "Champaign County Sheriff Office and Jail Data"),
+  dashboardSidebar(),
+  dashboardBody(
+    # Boxes need to be put in a row (or column)
+    fluidRow(
+      box(plotOutput("textPlot", height = 250)),
+
+      box(
+        title = "Controls",
+        selectInput("bookingdates", "Choose a booking date:",
+      list(`Dates` = sort(unique(jail$booking_date, "%m/%d/%Y"))  ))
+      )
+    )
+  )
+)
+
+server <- function(input, output) {
+
+    output$textPlot <- renderPlot({
+        # generate counts based on input$bookingdates from ui.R
+        x <- table(jail[jail$booking_date==input$bookingdates,]$race)
+        
+        # draw the text plot
+        plot(1:7, 1:7, type = "n", axes = FALSE, frame.plot = FALSE, ylab = "", xlab = "Year 2019", main = "Booking Counts by Race for Selected Date")
+text(rep(c(2,4,6),2)[1:length(x)], c(rep(6,3),rep(3,3))[1:length(x)], labels = unname(x)[1:length(x)], cex = 3)
+text(rep(c(2,4,6),2)[1:length(x)], c(rep(5,3),rep(2,3))[1:length(x)], labels = names(x)[1:length(x)], cex = 1)
+
+    })
+}
+
+shinyApp(ui, server)
+```

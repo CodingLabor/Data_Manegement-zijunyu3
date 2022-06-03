@@ -1,0 +1,82 @@
+# STAT 440 Statistical Data Management - Spring 2022
+## Week04 Lab01 Wed
+### Both .Rmd and .html files must be submitted by the end of class plus a 10 minute grace period. Any lab submitted after that 10 minute grace period will be deducted 2 points for being late. Labs submitted after the lab solution is posted will not be accepted; resulting in a 0 for that driver's lab.
+#### Only the driver should submit this assignment into their individual student repo. Save the filename as lab01-week04-section02-wed-netID.Rmd and render this file to .html. 
+
+
+**#1** (Syllabus, Markdown) Using Markdown syntax, make a numbered list with the first and last names of everyone at your station. Your name should appear in bold and italic text.  
+
+**Answer:** Answers will vary, but must be a proper list with names and letters. Driver's name must be bold and italic text.
+
+**#2** (Reshaping data, Markdown)
+
+Describe the operation of transposing a data object in your own words.
+
+**Answer:** Exact wording will vary, but the overall idea is that transposing means to make the columns become the rows.
+
+**#3** (Accessing and importing data) Import the Champaign County Sheriff Office & Jail Data (CCSO) using its URL https://uofi.box.com/shared/static/b6kuknulot4bqyo7elc8gmm6qzhnk766.dat, print the structure of the data, and ensure the 4 dates and times columns are formatted properly as dates and times in R respectively. Also ensure the booking number and jacket number columns are formatted as character columns.
+
+  - The dataset (a .dat file) contains over 11082 observations and 40 columns for individuals who were booked into jail in Champaign County. The individuals are not identifiable based on personal identity, but they are given unique jacket numbers. Some rows in the data appear more than once because of multiple crimes being assigned to one person. But there is also the possibility of there being recidivists. A recidivist is a person who goes to jail repeatedly (more than one datetime). The demographics of the people, reasons for being booked, and crime code are also given in the data. The original source is CCSO.
+
+**Answer:**
+
+```{r prob3}
+library(tidyverse)
+ccso <- read_csv("https://uofi.box.com/shared/static/b6kuknulot4bqyo7elc8gmm6qzhnk766.dat", 
+    col_types = cols(booking_number = col_character(),
+                     booking_date = col_date(format = "%m/%d/%Y"), 
+                     booking_time = col_time(format = "%H:%M:%S"),
+                     jacket_number = col_character(),
+                     released_date = col_date(format = "%m/%d/%Y"),
+                     released_time = col_time(format = "%H:%M:%S")))
+
+str(ccso)
+```
+
+**#4** (Data reduction, Data expansion, Arranging data) Beginning with the data imported in **Problem 3**, create a new data object named "other_jail" that does the following in this order:
+
+- mutates a new column called "duration" which computes the difference between age at release and age at arrest
+
+- selects the following columns: "booking_number", "jacket_number", "age arrest", "age releas", "duration", "city", "race", "sex", "release reason description"
+
+- filters the cities of residence to not be equal to "CHAMPAIGN" nor "URBANA"
+
+- randomize the rows
+
+Now, print the last 10 rows of the resulting "other_jail" data. **When printing the result, use the `width=Inf` argument of the `print()` function.**
+
+**Answer:**
+
+```{r prob5}
+other_jail <- ccso %>%
+  mutate(duration = `age releas`-`age arrest`) %>%
+  select(booking_number, jacket_number, `age arrest`, `age releas`, duration, city, race, sex, `release reason description`) %>%
+  filter(city!="CHAMPAIGN", city!="URBANA") %>%
+  slice_sample(n=nrow(.))
+ 
+print(slice_tail(other_jail,n=10), width=Inf)
+```
+
+**#5** (Reshaping data, Data reduction, Arranging data) Beginning with the data imported in **Problem 3**, create a new data object named "ccso_r" that does the following in this order:
+
+- slice to keep the 4th through 6th rows
+
+- arrange by the jacket number in ascending order
+
+- select the following columns: booking_number, jacket_number, `age arrest`, city, race, sex, crime, statue
+
+- reshape such that the column named as "crime" becomes three new columns associated with the 3 crimes this one individual is accused of committing. The values associated with these crimes should come from the "statue" column. 
+
+Now, print the reshaped data. **When printing the result, use the `width=Inf` argument of the `print()` function.**
+
+**Answer:**
+
+```{r}
+ccso_r <- ccso %>%
+  slice(4:6) %>%
+  arrange(jacket_number) %>%
+  select(booking_number, jacket_number, `age arrest`, city, race, sex, crime, statue) %>%
+  pivot_wider(names_from="crime", values_from="statue")
+
+print(ccso_r, width=Inf)
+```

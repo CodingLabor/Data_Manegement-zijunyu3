@@ -1,0 +1,73 @@
+# STAT 440 Statistical Data Management - Spring 2022
+## Week14 Lab03 Wed
+### Both .Rmd and .html files must be submitted by the end of class plus a 10 minute grace period. Any lab submitted after that 10 minute grace period will be deducted 2 points for being late. Labs submitted after the lab solution is posted will not be accepted; resulting in a 0 for that driver's lab.
+#### Only the driver should submit this assignment into their individual student repo. Save the filename as lab03-week14-section01-wed-netID.Rmd and render this file to .html. 
+
+
+**#1** This problem includes concepts from the following notes: Markdown. 
+
+**Problem:** Using Markdown syntax, make a numbered list with the first and last names of everyone at your station. Your netID should appear in all lowercase text.
+
+**Answer:** Answers will vary. A numbered list includes numbers followed by period. Sample below.
+
+1. drivernetid
+
+2. Passenger Name
+
+**#2** This problem includes concepts from the following notes/videos: Data Expansion, Data Reduction, Markdown. 
+
+**Problem:** If the statement below is TRUE, then write TRUE in the **Answer** section and provide evidence (code and results) that it is TRUE. If the statement below is FALSE, then write FALSE in the **Answer** section and provide evidence (code and results) that it is FALSE.
+
+- Statement: The example base R code `data1[data1$column1=="group1",] <- 1` has no tidyverse equivalent.
+
+**Answer:** FALSE
+
+```{r}
+library(tidyverse)
+iris1 <- iris %>%
+  mutate(Sepal.Length = ifelse(Species == "setosa", 1, Sepal.Length), Sepal.Width = ifelse(Species == "setosa", 1, Sepal.Width))
+
+slice_head(iris1, n = 5)
+```
+
+**#3** This problem includes concepts from the following notes: Accessing and importing data.
+
+**Problem:** Import the Speed Dating Data using its URL https://uofi.box.com/shared/static/66vf9hjpgm4vr8ydsw2zb51h13c4u0re.csv and print the resulting first 10 rows. **SQL not required.** Also, read the data key here https://uofi.box.com/shared/static/uikr6kj4zs1hrao790b3aiznodrjzkof.doc and the data description below.
+
+Data description for the Speed Dating Data: The dataset contains a total of 162 observations and 59 columns. The observations are four minute dates that individuals participated in for a speed dating experiment conducted by the Columbia Business School. The columns contain demographic information about the daters and datees as well as survey responses about the dater, dater's dating preferences and scores that the dater gave the datee (datee is defined as "partner"). The datee is the person of the opposite sex who joined the table for the speed date. Technically, the data should contain information from the perspective of the datee when the gender variable changes; thus making them now the dater. A match occurs when both the dater and the datee agree to go on a second date (after the experiment is over). The original sources are Ray Fisman and Sheena Iyengar.
+
+```{r}
+dating <- read_csv("https://uofi.box.com/shared/static/66vf9hjpgm4vr8ydsw2zb51h13c4u0re.csv")
+slice_head(dating, n=10)
+```
+
+**#4** This problem includes concepts from the following notes/videos: Arranging data, Data reduction, Data expansion, Vectorization, Regular expressions and string manipulation, Summarizing data, Combining data, SQL for weeks 03-07 content, SQL sub-queries, Tool-making and programming Part01.
+
+**Problem:** What is the median abs_int_corr for each field of study? **The abs_int_corr is the absolute value of int_corr.**? Write your answer in Markdown syntax with complete sentence(s) and show SQL code and result as evidence.
+
+**Answer:** See the list below. Alternatively, write each field of study and its median abs_int_corr value.
+
+```{r}
+library(sqldf)
+sqldf("SELECT field, median(abs(int_corr)) AS med_abs_int_corr
+      FROM dating
+      GROUP BY field")
+```
+
+**#4** This problem includes concepts from the following notes/videos: Arranging data, Data reduction, Data expansion, Vectorization, Regular expressions and string manipulation, Summarizing data, Combining data, SQL for weeks 03-07 content, SQL sub-queries, Tool-making and programming Part01, Data visualization using base R, Data visualization using Tidyverse.
+
+**Problem:** Create a data visualization that compares the proportion of matches (speed daters that say Yes to each other) among speed daters with lower than average absolute interest correlations vs those with higher than average absolute interest correlations. The title of the data viz should be "Do Opposites Attract?"
+
+**Answer:**
+
+```{r}
+dating %>%
+  mutate(abs_int_corr = abs(int_corr),
+         avg_abs_int_corr = ifelse(abs(int_corr)<mean(abs(int_corr), na.rm=TRUE),"lowerThanAvg","higherThanAvg") ) %>%
+  group_by(avg_abs_int_corr) %>%
+  summarise(proportion = sum(match)/30 ) %>%
+  ggplot() +
+  geom_col(mapping=aes(x=avg_abs_int_corr, y=proportion)) +
+  coord_flip() +
+  labs(title="Do Opposites Attract?")
+```

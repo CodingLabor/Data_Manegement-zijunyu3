@@ -1,0 +1,47 @@
+# STAT 440 Statistical Data Management - Spring 2022
+## Week05 Lab01 Mon
+### Both .Rmd and .html files must be submitted by the end of class plus a 10 minute grace period. Any lab submitted after that 10 minute grace period will be deducted 2 points for being late. Labs submitted after the lab solution is posted will not be accepted; resulting in a 0 for that driver's lab.
+#### Only the driver should submit this assignment into their individual student repo. Save the filename as lab01-week05-section01-mon-netID.Rmd and render this file to .html. 
+
+
+**#1** (Syllabus, Markdown) Using Markdown syntax, make a numbered list with the first and last names of everyone at your station. Your name should appear in all lowercase text.
+
+**Answer:** 
+
+**#2** (Vectorization, Markdown)
+
+statement: R's `sum()` function is an example of **vectorization**. 
+
+If the text in bold (within the statement above) is the word or phrase that makes the statement true, then write TRUE below in all caps. If the text in bold (within the statement above) is the word or phrase that makes the statement false, then write FALSE below in all caps followed by the correct term in bold text. For example, FALSE **newword** 
+
+**Answer:** 
+
+**#3** (Accessing and importing data) Import the Speed Dating Data using its URL https://uofi.box.com/shared/static/66vf9hjpgm4vr8ydsw2zb51h13c4u0re.csv and print the resulting first 10 rows.
+
+Speed Dating Data description: The dataset contains a total of 162 observations and 59 columns. The observations are four minute dates that individuals participated in for a speed dating experiment conducted by the Columbia Business School. The columns contain demographic information about the daters and datees as well as survey responses about the dater, dater's dating preferences and scores that the dater gave the datee (datee is defined as "partner"). The datee is the person of the opposite sex who joined the table for the speed date. Technically, the data should contain information from the perspective of the datee when the gender variable changes; thus making them now the dater. A match occurs when both the dater and the datee agree to go on a second date (after the experiment is over). The original sources are Ray Fisman and Sheena Iyengar.
+
+**Answer:** 
+
+```{r}
+
+```
+
+**#4** (Loops and conditional execution, Apply family of functions, Vectorization) Beginning with the imported data in **Problem 3**, apply data management concepts to answer the following question(s) in Markdown syntax and complete sentence(s) (excluding `group_by()` and similar functions beyond the current week of concepts):
+
+- What is the average int_corr for each field of study?
+
+**Answer:** 
+
+```{r}
+
+```
+
+**#5** (Loops and conditional execution, Vectorization) (Loops and conditional execution, Apply family of functions, Vectorization) Beginning with the imported data in **Problem 3**, apply data management concepts to answer the following question(s) in Markdown syntax and complete sentence(s) (excluding `group_by()` and similar functions beyond the current week of concepts):
+
+- Which field has the smallest average date score? Which field has the largest average date score? **The date score equals the sum of attr, sinc, intel, fun, amb, shar, like, and prob.**
+
+**Answer:**
+
+```{r}
+
+```

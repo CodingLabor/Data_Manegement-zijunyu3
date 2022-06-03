@@ -1,0 +1,105 @@
+# STAT 440 Statistical Data Management - Spring 2022
+## Week11 Lab02 Section 02 Mon
+### Both .Rmd and .html files must be submitted by the end of class plus a 10 minute grace period. Any lab submitted after that 10 minute grace period will be deducted 2 points for being late. Labs submitted after the lab solution is posted will not be accepted; resulting in a 0 for that driver's lab.
+#### Only the driver should submit this assignment into their individual student repo. Save the filename as lab02-week11-section02-mon-netID.Rmd and render this file to .html. 
+
+
+**#1** This problem includes concepts from the following notes: Markdown. 
+
+**Problem:** Using Markdown syntax, make a numbered list with the first and last names of everyone at your station. Your netID should appear in all lowercase text.
+
+**Answer:** 
+
+**#2** This problem includes concepts from the following notes/videos: SQL for weeks 03-07 content, Markdown. 
+
+**Problem:** If the statement below is TRUE, then write TRUE in the **Answer** section and provide evidence (code and results) that it is TRUE. If the statement below is FALSE, then write FALSE in the **Answer** section and provide evidence (code and results) that it is FALSE.
+
+- Statement: SQL's **WHERE** clause allows conditions to be placed on groups of data for group processing.
+
+**Answer:**
+
+```{r prob2}
+library(sqldf)
+sqldf("SELECT *
+FROM iris
+GROUP BY Species
+HAVING `Sepal.Length`>5
+      ")
+```
+
+**#3** This problem includes concepts from the following notes: Accessing and importing data.
+
+**Problem:** Import the Champaign County Sheriff Office & Jail Data and its data URL https://uofi.box.com/shared/static/b6kuknulot4bqyo7elc8gmm6qzhnk766.dat and print the resulting first 10 rows.
+
+- Data description for Champaign County Sheriff Office & Jail Data: The dataset contains 11082 observations and 40 columns for individuals who were booked into jail in Champaign County Jail. The individuals are identifiable based on personal identity, and they are given unique jacket numbers. Some rows in the data appear more than once because of multiple crimes being assigned to one person. But there is also the possibility of there being recidivists. A recidivist is a person who goes to jail repeatedly (more than one datetime). The demographics of the people, reasons for being booked, and crime code are also given in the data. The original source is the Champaign County Sheriff Office & Jail (CCSO).
+
+**Answer:**
+
+```{r prob3}
+library(tidyverse)
+jail <- read_csv("https://uofi.box.com/shared/static/b6kuknulot4bqyo7elc8gmm6qzhnk766.dat", 
+    col_types = cols(booking_date = col_character(), 
+        booking_time = col_character(), 
+        released_date = col_character(), 
+        released_time = col_character())) #import data
+
+
+sqldf("SELECT *
+FROM jail
+ORDER BY booking_number DESC
+LIMIT 10
+      ") #print last 10 rows (not necessarily in order but acceptable)
+
+#Alternatively, the subquery way
+sqldf("SELECT *
+FROM (SELECT *
+FROM jail
+ORDER BY booking_number DESC
+LIMIT 10)
+ORDER BY booking_number
+      ") #print last 10 rows (not necessarily in order)
+
+
+#Alternatively, the OFFSET way
+sqldf("SELECT *
+FROM jail
+LIMIT 10 OFFSET 11072
+      ") #print last 10 rows (not necessarily in order)
+
+```
+
+**#4** This problem includes concepts from the following notes: SQL for weeks 03-07 content, SQL subqueries.
+
+**Problem:**  Beginning with the data imported in **Problem 3**, answer the following question in complete sentence(s) using Markdown syntax and showing code and results as evidence of your answer.
+
+- How many people booked into jail are not considered recidivists (see definition of "recidivist" in the data description)? **You must use SQL to complete this problem; no tidyverse functionality.**
+
+**Answer:**
+
+```{r prob4}
+jailnr <- sqldf("SELECT jacket_number, COUNT(jacket_number) AS jid
+      FROM (SELECT DISTINCT new_id, booking_number, jacket_number,`age arrest`, race, sex
+      FROM (SELECT booking_number, jacket_number,`age arrest`, race, sex, booking_number + jacket_number AS new_id
+      FROM jail))
+      GROUP BY jacket_number
+      HAVING jid==1
+      ")
+
+sqldf("SELECT COUNT(jacket_number)
+FROM jailnr
+      ")
+```
+
+**#5** This problem includes concepts from the following notes: Accessing and importing data, Arranging data, Data reduction, Data expansion, Vectorization, Regular expressions and string manipulation, Summarizing data, Cleaning data, Custom Functions AKA Tools.
+
+**Problem:** Create a user-defined function called `colMedians` which computes the median for each column of a 2-dimensional object (array, data frame or tibble). Next, demonstrate that your function works to compute the median for the following columns: age at arrest, age at release, days in jail, and hours in jail. **SQL not required in this problem.**
+
+**Answer:** 
+
+```{r prob5}
+colMedians <- function(data,cols){
+  apply(data[,cols],2,function(x){
+    median(x,na.rm=TRUE)})
+}
+colMedians(jail,11:14)
+```

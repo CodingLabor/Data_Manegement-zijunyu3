@@ -1,0 +1,105 @@
+# STAT 440 Statistical Data Management - Spring 2022
+## Week10 Lab02 Section 02 Mon
+### Both .Rmd and .html files must be submitted by the end of class plus a 10 minute grace period. Any lab submitted after that 10 minute grace period will be deducted 2 points for being late. Labs submitted after the lab solution is posted will not be accepted; resulting in a 0 for that driver's lab.
+#### Only the driver should submit this assignment into their individual student repo. Save the filename as lab02-week10-section02-mon-netID.Rmd and render this file to .html. 
+
+
+**#1** This problem includes concepts from the following notes: Markdown. 
+
+**Problem:** Using Markdown syntax, make a numbered list with the first and last names of everyone at your station. Your netID should appear in all lowercase text.
+
+**Answer:** Answers will vary, but must be a proper list with Driver's netID in all lowercase text.
+
+**#2** This problem includes concepts from the following notes/videos: Data reduction, Summarizing data, Markdown. 
+
+**Problem:** If the statement below is TRUE, then write TRUE in the **Answer** section and provide evidence (code and results) that it is TRUE. If the statement below is FALSE, then write FALSE in the **Answer** section and provide evidence (code and results) that it is FALSE.
+
+- Statement: The R tidyverse's `filter()` function allows conditions to be placed on groups of data for keeping certain rows without employing the `group_by()` function.
+
+**Answer:** FALSE  
+
+```{r prob2}
+library(tidyverse)
+library(jsonlite)
+
+dplyr::filter(iris, Sepal.Length>7.5, .preserve=Species)
+
+iris %>%
+  group_by(Species) %>%
+  filter(Sepal.Length>7.5)
+```
+
+**#3** This problem includes concepts from the following notes: Accessing and importing data.
+
+**Problem:** Import the 2020 NBA Season Data (four datasets total) using these four URLs https://uofi.box.com/shared/static/grgt4wkiumfjgpug3fsx2vfkipv5rxz1.json, https://uofi.box.com/shared/static/af959qr9ewjgain1obkzmagapkmw8wbj.json, https://uofi.box.com/shared/static/raqot999l9yo6qz26k13epitft9j2ay4.json, https://uofi.box.com/shared/static/m2bnj0a2lize6t9ln3z9gd97jnwm0b6d.json, and print the resulting last 5 rows of each dataset.
+
+- Data description for the 4 NBA 2020 Season datasets: The dataset (four .json files) contains a total of 540 unique observations and 26 columns. The observations are professional basketball players in the National Basketball Association (NBA) and their season statistics for the 2020-2021 season. A stint is the duration of time someone worked for a particular employer. In this basketball data, a stint is a number representing the time a player was with a particular team. Some players are traded during the season, which means they would have more than 1 stint. A player's basketball statistics start over for each stint they have in a season. There are 540 unique player IDs across all stints. The original source is the NBA and Sports Reference. Also see the [2020 NBA Data Key](https://uofi.box.com/shared/static/oe2bbjn0xyhs9azbxaz00ab5ua6nbr9r.pdf).
+
+**Answer:**
+
+```{r prob3}
+nba1 <- fromJSON("https://uofi.box.com/shared/static/grgt4wkiumfjgpug3fsx2vfkipv5rxz1.json")
+nba2 <- fromJSON("https://uofi.box.com/shared/static/af959qr9ewjgain1obkzmagapkmw8wbj.json")
+nba3 <- fromJSON("https://uofi.box.com/shared/static/raqot999l9yo6qz26k13epitft9j2ay4.json")
+nba4 <- fromJSON("https://uofi.box.com/shared/static/m2bnj0a2lize6t9ln3z9gd97jnwm0b6d.json") #importing JSON data
+
+slice_tail(nba1,n=5) #print last 5 rows
+slice_tail(nba2,n=5) #print last 5 rows
+slice_tail(nba3,n=5) #print last 5 rows
+slice_tail(nba4,n=5) #print last 5 rows
+```
+
+**#4** This problem includes concepts from the following notes: Accessing and importing data, Arranging data, Data reduction, Data expansion, Vectorization, Regular expression and string manipulation, Summarizing data, Validating data, Cleaning data, Markdown.
+
+**Problem:** Beginning with the imported data and address the following (in this order) using any data management concepts:
+
+  - combine the four data sets into a new object called "nba2020"
+
+  - summarize the data such that all basketball statistics are totaled across all stints per player; there should only be 540 players after summarizing; use the final stint's Position, Age, and Team for each player
+
+  - mutate a new column called "REBOUNDS" that represents a combination of offensive rebounds and defensive rebounds
+
+  - mutate a new column called "ATO" that represents the assists to turnovers ratio (assists divided by turnovers)
+
+  - mutate a new column called "PTM" that represents the points to minutes played ratio (points divided by minutes played)
+
+  - mutate a new column called "3PP" that represents three-point shots made out of three-point attempts multiplied by 100
+
+  - de-select the stint column
+
+- Now, print the first 15 observations of the resulting "nba2020" data object such that the data is sorted by PTM in descending order and only the following columns are selected: PlayerName, PlayerID, Pos, Tm, Age, PTM.
+
+- Data description for the 4 NBA 2020 Season datasets: The dataset (four .json files) contains a total of 540 unique observations and 26 columns. The observations are professional basketball players in the National Basketball Association (NBA) and their season statistics for the 2020-2021 season. A stint is the duration of time someone worked for a particular employer. In this basketball data, a stint is a number representing the time a player was with a particular team. Some players are traded during the season, which means they would have more than 1 stint. A player's basketball statistics start over for each stint they have in a season. There are 540 unique player IDs across all stints. The original source is the NBA and Sports Reference. Also see the [2020 NBA Data Key](https://uofi.box.com/shared/static/oe2bbjn0xyhs9azbxaz00ab5ua6nbr9r.pdf).
+
+**Answer:** 
+
+```{r prob4}
+nba2020 <- bind_rows(nba4, nba3, nba2, nba1)
+nba20202 <- nba2020 %>%
+  group_by(PlayerID) %>%
+  arrange(PlayerID) %>%
+#  select(G:PTS) %>%
+  mutate(G2=sum(G),GS2=sum(GS),MP2=sum(MP),FG2=sum(FG),FGA2=sum(FGA),`3P2`=sum(`3P`),`3PA2`=sum(`3PA`),`2P2`=sum(`2P`),`2PA2`=sum(`2PA`),FT2=sum(FT),FTA2=sum(FTA),ORB2=sum(ORB),DRB2=sum(DRB),TRB2=sum(TRB),AST2=sum(AST),STL2=sum(STL),BLK2=sum(BLK),TOV2=sum(TOV),PF2=sum(PF),PTS2=sum(PTS)) %>%
+  distinct(PlayerID,.keep_all = TRUE) %>%
+  select(-(G:PTS),-stint) %>%
+  rename(REBOUNDS=TRB2) %>%
+  mutate(ATO=AST2/TOV2, PTM=PTS2/MP2,`3PP`=100*`3P2`/`3PA2`)
+
+nba20202 %>%
+  select(PlayerName, PlayerID, Pos, Tm, Age, PTM) %>%
+  arrange(desc(PTM)) %>%
+  head(15)
+```
+
+**#5** This problem includes concepts from the following notes: Accessing and importing data, Arranging data, Data reduction, Data expansion, Vectorization, Regular expressions and string manipulation, Summarizing data, Cleaning data, Markdown.
+
+**Problem:** **Among the starters (percentage of games started to games played is at least 90%), how many players are balanced (within 100 points) in offensive and defensive play?** Write your answer in the **Answer** section below in Markdown syntax with complete sentence(s) and show SQL code and result as evidence. Ideally, you will begin with the resulting combined dataset in **Problem 4**. You must create an offensive play column in the data that computes the total of FT, FG, ORB, and AST. You must create a defensive play column in the data that computes the total of STL, BLK, and DRB. The unit for these two new columns is "points".
+
+**Answer:** There are 13 starters who are balanced in offensive and defensive play. Absolute value is the appropriate function to use here.
+
+```{r prob5}
+nba20202 %>%
+  mutate(Defensive = STL2+BLK2+DRB2, Offensive = FT2+FG2+ORB2+AST2) %>%
+  filter(GS2/G2>=0.9, abs(Offensive-Defensive)<=100) %>%
+  select(PlayerName)
+```

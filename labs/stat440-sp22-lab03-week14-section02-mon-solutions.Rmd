@@ -1,0 +1,99 @@
+# STAT 440 Statistical Data Management - Spring 2022
+## Week14 Lab03 Section 02 Mon
+### Both .Rmd and .html files must be submitted by the end of class plus a 10 minute grace period. Any lab submitted after that 10 minute grace period will be deducted 2 points for being late. Labs submitted after the lab solution is posted will not be accepted; resulting in a 0 for that driver's lab.
+#### Only the driver should submit this assignment into their individual student repo. Save the filename as lab01-week14-section02-mon-netID.Rmd and render this file to .html. 
+
+
+**#1** This problem includes concepts from the following notes: Markdown. 
+
+**Problem:** Using Markdown syntax, make a numbered list with the first and last names of everyone at your station. Your netID should appear in all lowercase text.
+
+**Answer:** Answers will vary. A numbered list includes numbers followed by period. Sample below.
+
+1. drivernetid
+
+2. Passenger Name
+
+**#2** This problem includes concepts from the following notes/videos: Shiny apps and dashboards, Markdown. 
+
+**Problem:** If the statement below is TRUE, then write TRUE in the **Answer** section and provide evidence (code and results) that it is TRUE. If the statement below is FALSE, then write FALSE in the **Answer** section and provide evidence (code and results) that it is FALSE.
+
+- Statement: The `function()` function can be used to create a new user-defined function.
+
+**Answer:** TRUE
+
+```{r}
+abc <- function(size){
+  rep(letters,size)
+}
+abc(3)
+```
+
+**#3** This problem includes concepts from the following notes: Accessing and importing data, SQL for weeks 03-07 content, SQL sub-queries.
+
+**Problem:** Import the Chicago 311 Service Requests for Abandoned Vehicles Data using its URL https://uofi.box.com/shared/static/526squ7ue3j2ugmjqp280ti0lwh68w10.csv and print the resulting last 10 rows. **SQL not required.**
+
+Data description for Chicago 311 Service Requests for Abandoned Vehicles Data: The dataset contains 261486 observations and 14 columns. The subjects are reports of abandoned vehicles around Chicago such that those reports are made to Chicago's 311 service. A vehicle can be classified as abandoned if it meets one or more of the following criteria: 1) On a public way in a state of disrepair as to be incapable of being driven in its present condition. 2) Has not been moved or used for more than seven consecutive days and is apparently deserted. 3) Has been left on the public way without state registration or a temporary state registration placard for two or more days. 4) Is a hazardous dilapidated vehicle left in full view of the general public, whether on public or private property. Requests that have been labeled as Duplicates are in the same geographic area and have been entered into 311 Customer Service Requests (CSR) system at around the same time as a previous request. Duplicate reports/requests are labeled as such in the Status field, as either "Open - Dup" or "Completed - Dup." Original source is City of Chicago.
+
+**Answer:** This problem was originally intended to say "SQL is required". If you did not use SQL but still got the answer complete and correct, then points will not be deducted for that.
+
+```{r}
+library(tidyverse)
+csr <- read_csv("https://uofi.box.com/shared/static/526squ7ue3j2ugmjqp280ti0lwh68w10.csv")
+slice_tail(csr, n = 10)
+```
+
+Alternatively using SQL.
+
+```{r}
+library(sqldf)
+sqldf("
+      SELECT *
+      FROM csr
+      LIMIT 10 OFFSET 261476
+      ")
+```
+
+**#4** This problem includes concepts from the following notes/videos: Arranging data, Data reduction, Data expansion, Vectorization, Regular expressions and string manipulation, Summarizing data, Combining data, SQL for weeks 03-07 content, SQL sub-queries, Tool-making and programming Part01, Data visualization using base R, Data visualization using Tidyverse.
+
+**Problem:** Create a map style data visualization that plots the locations of these 311 service requests as a scatter plot. The points should be colored green if the request took less time than average to complete (measured in days).
+
+**Answer:** Can use either base R or tidyverse data visualization methods.
+
+```{r}
+csr <- csr %>%
+  mutate(CreationDate=as.Date(`Creation Date`, "%m-%d-%Y"),
+         CompletionDate=as.Date(`Completion Date`, "%m-%d-%Y"),
+         DiffInDays = difftime(`CompletionDate`,`CreationDate`, units="days"),
+         LessTimeThanAverage = ifelse(DiffInDays < mean(DiffInDays, na.rm = TRUE), 1, 0),
+         Longitude = as.numeric(str_extract(Location,"\\-\\d\\d\\.\\d+")),
+         Latitude = as.numeric(str_remove(str_extract(Location,"\\,\\s\\d\\d\\.\\d+"),"\\,\\s"))
+         )
+
+plot(csr[csr$LessTimeThanAverage==0,]$Longitude,csr[csr$LessTimeThanAverage==0,]$Latitude, pch=19, frame.plot = FALSE, main = "Map of Chicago 311 Service Requests", col=1, xlab="Longitude", ylab="Latitude", axes=FALSE)
+grid()
+points(csr[csr$LessTimeThanAverage==1,]$Longitude,csr[csr$LessTimeThanAverage==1,]$Latitude,col="green", pch=20, lwd=0.5)
+```
+
+**#5** This problem includes concepts from the following notes/videos: Arranging data, Data reduction, Data expansion, Vectorization, Regular expressions and string manipulation, Summarizing data, Combining data, SQL for weeks 03-07 content, SQL sub-queries, Tool-making and programming Part01.
+
+**Problem:** Among the service requests with fewer than average differences in creation date and completion date (measured in days), which Community Area Number is associated with the most 311 service requests for abandoned vehicles? Write your answer in Markdown syntax with complete sentence(s) and show SQL code and result as evidence.
+
+**Answer:** Among the service requests with fewer than average differences in creation date and completion date, Community Area Number **25** is associated with the most 311 service requests for abandoned vehicles. **It is acceptable that students may have used tidyverse in previous problem for creating difference in days columns. Thus, it may not be necessary to repeat those steps in this problem in SQL. It is acceptable that students may have removed repeat case numbers to get a more accurate representation of the unique 311 service requests. If so, then answers may differ from solution provided here.**
+
+```{r}
+#x<-sqldf("
+#      SELECT DISTINCT `Service Request Number`, `Community Area`
+#      FROM csr
+#      WHERE LessTimeThanAverage=1")
+
+sqldf("
+      SELECT `Community Area`, COUNT(`Community Area`) AS nca
+      FROM (SELECT `Community Area`
+      FROM csr
+      WHERE LessTimeThanAverage=1)
+      GROUP BY `Community Area`
+      ORDER BY nca DESC
+      LIMIT 5
+      ")
+```
