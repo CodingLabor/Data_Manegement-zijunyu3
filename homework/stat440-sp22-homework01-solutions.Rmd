@@ -1,0 +1,159 @@
+---
+title: "STAT 440 Statistical Data Management - Spring 2022"
+output: html_document
+---
+
+## Homework01
+### Due: Monday February 07, 2022 11:59 pm US Central Time
+#### Created by Christopher Kinson
+
+Grading Rubric (per question):  
+2 points if complete and correct  
+1 point if incomplete or incorrect  
+0 points if no attempt made  
+
+
+**Retrieving your work**
+
+This and all future homework .Rmd files are written in Markdown. The .Rmd file can be rendered as an .html file for easier viewing. This and all future homework assignments are located in the **homework** directory within the **stat440-sp22-course-content** repo, i.e. **stat440-sp22-course-content/homework** in GitHub. It is always recommended that you **pull** (or refresh) the **stat440-sp22-course-content** repo to ensure that you have the most updated version of all course content including the homework assignments. After pulling (or refreshing) the **stat440-sp22-course-content** repo, the homework file will be in the homework directory. Once you have opened the .Rmd file, you may begin writing your answers beneath each problem. Do not remove any of the original problems from the file, because that makes it more difficult for the course staff to grade your assignment. 
+
+**Submitting your work**
+
+In your individual student repo (named as your netID), you are to submit ***two*** files:
+
+a. Your reproducible document file (.Rmd) which should be saved as homework#-netID.Rmd. For example, my homework 01 file would be saved as homework01-kinson2.Rmd.
+
+b. Your rendered reproducible document file (.html) which should be saved as homework#-netID.html. For example, my homework 01 file would be saved as homework01-kinson2.html.
+
+**Do not place your files in a sub-directory (or folder).** You have an unlimited number of submissions, but only the latest proper submission (commit and push) will be viewed and graded. **Remember the .Rmd file needs to render properly to .html before submitting.** 
+
+
+***
+
+Undergraduates are expected to complete the problems **#1-#8**. Graduate students are expected to complete all problems.
+
+**The following problems should be completed by you as an individual. If any problem asks you a particular question, be sure to answer it completely (with code, written sentences, or both). Written sentences should not appear in code chunks or code cells. Written sentences should appear in Markdown syntax unless specifically stated otherwise.**
+
+***Do not change anything in this file above the double line. Doing so will prevent your homework from being graded.***
+
+***
+***
+
+### Use the URLs to access the data. No local files allowed.
+
+
+**#1** (Markdown) Using Markdown syntax, make a non-numbered list with your first name in normal text as the first item and your last name in all caps and bold text as the second item.
+
+**Answer:** Answers will vary, but must be a numbered list. Graded for completeness. For example,
+
+- Chris
+
+- **KINSON**
+
+**#2** (Personal survey, Markdown) Select all of the following that you feel are must-haves in order for your learning to be successful.
+
+i. lecture videos
+ii. course notes
+iii. assignments
+iv. assignment solutions
+v. feedback on the assignments
+vi. office hours
+vii. discussions with classmates
+
+**Answer:** Answers will vary, but must write at least one of the choices. Graded for completeness.
+
+**#3** (Personal survey, Markdown) Think about the previous two weeks (your experiences, assignments, and life). Using Markdown, describe in paragraph form (with at least 3 complete sentences): what was the most challenging part(s) about those weeks, and the thing(s) that made your weeks successful or unsuccessful.
+
+**Answer:** Answers will vary, but must have 3 complete sentences. Graded for completeness.
+
+**#4** (Structures of data, delimiters, and file extensions, Markdown) If a data file is given the .csv file extension, then the data file must be comma-separated. True or False?
+
+**Answer:** False
+
+**#5** (Prior knowledge, Markdown) Consider the information in the image below and the image itself as a data set. Make 2 Markdown lists: one list contains 3 observations about the data set (i.e. things you see that are obvious), and the second list contains 3 questions about the data set (i.e. things that are not obvious that you are curious about). 
+
+![pic-problem05](https://uofi.box.com/shared/static/vyh0i3vukckvt2sxva7bdxzqx211vzmk.jpg)
+
+**Answer:** Answers will vary, but must be two lists each with three items. Graded for completeness. For example,
+
+List 1
+
+a. Data is a picture of a black man grilling food.  
+b. There are two grills in the image. 
+c. The image is 102 KB in size.  
+
+List 2
+
+a. When was the data produced?
+b. What kind of food is being cooked?  
+c. Where is the location?
+
+**#6** (Accessing and importing data) Import the members of the current US Congress Data using its data URL https://theunitedstates.io/congress-legislators/legislators-current.json and print the structure of the data. **This structure should match the data description below.** 
+
+  - The dataset (a .json file) contains the 540 members of the US Congress with 6 variables ("columns") per person which includes details about the legislators' first and last names, official full name, middle name, nickname, and suffixes. According to the GovTrack, "the United States Congress has two chambers, one called the Senate and the other called the House of Representatives (or "House" for short) which share the responsibilities of the legislative process to create federal statutory law." The original source is TheUnitedStates.io and GovTrack.
+
+**Answer:**
+
+```{r prob06}
+library(tidyverse)
+library(jsonlite)
+legislators_data0 <- fromJSON("https://theunitedstates.io/congress-legislators/legislators-current.json")
+names(legislators_data0)
+legislators_data <- legislators_data0$name
+str(legislators_data)
+```
+
+**#7** Import the Rental Inspection Grades Listing Data using its data URL https://uofi.box.com/shared/static/lbqe1l9a2g5lr0twk6zcwajasybekget.json. Now, print the structure of the data. This structure should match the data description below.  
+
+  - The dataset (a .json file) contains the 1738 rental properties in Urbana with 7 variables ("columns") per property which includes details about the parcel number, address, grade, inspection date, and more. The rental properties are inspected on a rotating basis and can receive a letter grade of A, B, C, D, F, and N. The best grade is A. The original source is the City of Urbana.
+
+**Answer:**
+
+```{r prob07}
+rentals <- read_csv("https://uofi.box.com/shared/static/61w13855u06z11007t7nypo710gbiw4b.json")
+str(rentals)
+```
+
+**#8** (Accessing and importing data via web scraping) Web scrape the Champaign County Assessor's [website](https://champaignil.devnetwedge.com/) to extract a property's most recent Net Price (within the Sales History) in US Dollars. Extract this Net Price for the first 10 properties imported in **Problem 7** and print the resulting 10 Net Prices.
+
+**Answer:**
+
+```{r prob08}
+library(rvest)
+ 
+prop_url <- paste0("https://champaignil.devnetwedge.com/parcel/view/",rentals$`Parcel Number`,"/2021")
+
+sales <- rep(0, length(prop_url))
+
+for (i in 1:10){ 
+  if(length(html_text(html_nodes(read_html(prop_url[i]), "#parcel-views :nth-child(1) td:nth-child(9)"),trim=TRUE))==0){
+    sales[i] <- NA
+  }
+    else{
+  sales[i] <- html_text(html_nodes(read_html(prop_url[i]),"#parcel-views :nth-child(1) td:nth-child(9)"),trim=TRUE)
+    }
+}
+
+head(sales,10)
+```
+
+**#9** (Accessing and importing data, Handling dates and times) Import the Urbana Police Incidents Data using its data URL https://uofi.box.com/shared/static/uxk757wno4yzqyqtrahwzvckjvs9ulmn, print the structure of the data, and ensure the dates and times columns are formatted properly as dates and times in R respectively. This structure should match the data description below.  
+
+  - The dataset (a file with no extension) contains the 8015 police incidents in the year 2021 with 31 variables ("columns") per incident. The columns cover the details of the incident and associated crime including dates and times, locations, crime descriptions, and conclusions of the incident. The original source is the City of Urbana.
+
+**Answer:**
+
+```{r}
+police <- read_csv("https://uofi.box.com/shared/static/uxk757wno4yzqyqtrahwzvckjvs9ulmn", 
+    col_types = cols(`DATE OCCURRED` = col_date(format = "%m&%d&%Y"), 
+        `TIME OCCURRED` = col_time(format = "%H:%M"), 
+        `DATE REPORTED` = col_date(format = "%m/%d/%Y"), 
+        `TIME REPORTED` = col_time(format = "%H:%M"), 
+        `DATE ARRIVED` = col_date(format = "%m-%d-%Y"), 
+        `TIME ARRIVED` = col_time(format = "%H:%M")))
+str(police)
+```
+
+**#10** (Markdown) Which of these homework problems was the most challenging and why?
+
+**Answer:** Answers will vary. Graded for completeness.

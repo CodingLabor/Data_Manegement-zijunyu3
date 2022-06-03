@@ -1,0 +1,207 @@
+---
+title: "STAT 440 Statistical Data Management - Spring 2022"
+output: html_document
+---
+
+## Homework02
+### Due: Thursday February 24, 2022 11:59 pm US Central Time
+#### Created by Christopher Kinson
+
+Grading Rubric (per question):  
+2 points if complete and correct  
+1 point if incomplete or incorrect  
+0 points if no attempt made  
+
+
+**Retrieving your work**
+
+This and all future homework .Rmd files are written in Markdown. The .Rmd file can be rendered as an .html file for easier viewing. This and all future homework assignments are located in the **homework** directory within the **stat440-sp22-course-content** repo, i.e. **stat440-sp22-course-content/homework** in GitHub. It is always recommended that you **pull** (or refresh) the **stat440-sp22-course-content** repo to ensure that you have the most updated version of all course content including the homework assignments. After pulling (or refreshing) the **stat440-sp22-course-content** repo, the homework file will be in the homework directory. Once you have opened the .Rmd file, you may begin writing your answers beneath each problem. Do not remove any of the original problems from the file, because that makes it more difficult for the course staff to grade your assignment. 
+
+**Submitting your work**
+
+In your individual student repo (named as your netID), you are to submit ***two*** files:
+
+a. Your reproducible document file (.Rmd) which should be saved as homework#-netID.Rmd. For example, my homework 01 file would be saved as homework01-kinson2.Rmd.
+
+b. Your rendered reproducible document file (.html) which should be saved as homework#-netID.html. For example, my homework 01 file would be saved as homework01-kinson2.html.
+
+**Do not place your files in a sub-directory (or folder).** You have an unlimited number of submissions, but only the latest proper submission (commit and push) will be viewed and graded. **Remember the .Rmd file needs to render properly to .html before submitting.** 
+
+
+***
+
+Undergraduates are expected to complete the problems **#1-#8**. Graduate students are expected to complete all problems.
+
+**The following problems should be completed by you as an individual. If any problem asks you a particular question, be sure to answer it completely (with code, written sentences, or both). Written sentences should not appear in code chunks or code cells. Written sentences should appear in Markdown syntax unless specifically stated otherwise.**
+
+***Do not change anything in this file above the double line. Doing so will prevent your homework from being graded.***
+
+***
+***
+
+### Use the URLs to access the data. No local files allowed.
+
+
+**#1** (Markdown) Using Markdown syntax, make a non-numbered list with your first name in bold text as the first item and your last name in normal text as the second item.
+
+**Answer:** Answers will vary, but must be a proper list with first name in bold text and last name as second item in normal text.
+
+**#2** (Personal survey, Markdown) Think about the previous two weeks (your experiences, assignments, and life). Using Markdown, describe in paragraph form (with at least 3 complete sentences): what was the most challenging part(s) about those weeks, and the thing(s) that made your weeks successful or unsuccessful.
+
+**Answer:** Answers will vary, graded for completeness.
+
+**#3** (Loops and conditional execution, Markdown)
+
+statement: The `while` loop condition is checked at the top of the loop.
+
+If the statement is true, then write TRUE below in all caps. Otherwise write FALSE in all caps.
+
+**Answer:** ~~FALSE~~ TRUE (my apologies)
+
+**#4** (Accessing and importing data via Web scraping, Markdown)
+
+statement: When using the SelectorGadget tool, the highlighted yellow text on the website represents text that we want to de-select.
+
+If the statement is true, then write TRUE below in all caps. Otherwise write FALSE in all caps.
+
+**Answer:** TRUE. If a student wrote FALSE, we won't mark it incorrect. There is a scenario in which the user may want both green highlighted text and yellow highlighted text.
+
+**#5** (Vectorization, Markdown) 
+
+statement: The `sum()` function is a vectorized function.
+
+If the statement is true, then write TRUE below in all caps. Otherwise write FALSE in all caps.
+
+**Answer:** FALSE
+
+**#6** (Accessing and importing data, Arranging data, Data reduction, Data expansion) Import the Chicago Towed Vehicles Data using its URL https://uofi.box.com/shared/static/2yfvl36q1th1aq2nvhtiomhsk2uxip6u.csv and apply data management concepts to answer the following question in Markdown syntax and complete sentence(s): 
+
+- Among the 4D vehicles that were towed, what was the third most common Make? 
+
+Data description: This dataset contains . The subjects are locations for vehicles that have been towed and impounded by the City of Chicago. Illegally parked vehicles, abandoned vehicles and vehicles used for illegal activities may be towed. Original source is City of Chicago.
+
+**Answer:** The third most common 4D towed vehicles is TOY, which likely represents TOYOTA.
+
+```{r prob6}
+library(tidyverse) #load tidyverse package
+tow <- read_csv("https://uofi.box.com/shared/static/2yfvl36q1th1aq2nvhtiomhsk2uxip6u.csv", 
+    col_types = cols(`Tow Date` = col_date(format = "%m/%d/%Y"))) #import data
+names(tow) #show column names
+
+x <- tow %>%
+  filter(Style=="4D") #filter Style column to only show 4D Style rows
+  
+sort(table(x$Make), decreasing = TRUE)[1:3] #create a table that shows frequency of Make column, sort in descending order, show the top 3 frequencies
+```
+
+**#7** (Accessing and importing data, Arranging data, Data reduction, Data expansion,  Vectorization, Markdown) Import the Chicago Public Chauffeurs Data using its URL https://uofi.box.com/shared/static/4qcdq6qtofbtn3m7ifrnxaahzv6x1x0r.csv and apply data management concepts to answer the following question in Markdown syntax and complete sentence(s):
+
+- Which driver is the longest-serving active public chauffeur in operation in Chicago and for how many years?
+
+Data description: The dataset contains 22752 rows and 12 columns. The subjects are public chauffeurs in business in Chicago with licenses and various vehicle types. Original source is City of Chicago.
+
+**Answer:** MIRANDA, GILBERTO is the longest-serving active public chauffeur and served for 67 years if using today's date or 68 years if using the expiration date.
+
+```{r prob7}
+rm(tow, x) #removing previous dataset from R's internal memory
+driver <- read_csv("https://uofi.box.com/shared/static/4qcdq6qtofbtn3m7ifrnxaahzv6x1x0r.csv", 
+    col_types = cols(Renewed = col_date(format = "%m/%Y"), 
+        `Status Date` = col_date(format = "%m/%d/%Y"), 
+        Expires = col_date(format = "%m/%Y"), 
+        `Original Issue Date` = col_date(format = "%m/%d/%Y"))) #import data, reformat columns as date formats
+
+#if using today's date
+driver %>%
+  filter(Status=="ACTIVE") %>% #retain ACTIVE Status rows
+  mutate(YearsActive=as.vector(Sys.Date()-`Original Issue Date`)/365) %>% #create new column YearsActive which compute difference between today's date and Original Issue Date, dividing by 365 converts days to years, as.vector removes "days" label of differences
+  arrange(desc(YearsActive)) %>% #sort in descending order
+  select(Name, YearsActive) %>% #keep only 2 columns
+  slice_head(n=1) #show the first result
+
+#if using expiration date of their license
+driver %>%
+  filter(Status=="ACTIVE") %>% #retain ACTIVE Status rows
+  mutate(YearsActive=as.vector(Expires-`Original Issue Date`)/365) %>% #create new column YearsActive which compute difference between today's date and Original Issue Date, dividing by 365 converts days to years, as.vector removes "days" label of differences
+  arrange(desc(YearsActive)) %>% #sort in descending order
+  select(Name, YearsActive) %>% #keep only 2 columns
+  slice_head(n=1) #show the first result
+```
+
+**#8** (Accessing and importing data, Arranging data, Data reduction, Data expansion, Loops and conditional execution, Apply family of functions, Vectorization, Markdown) Import the Chicago Public Schools Progress Report Cards Data using its URL https://uofi.box.com/shared/static/iwdcncwuotz0wv8ax6yv1dbfjdtdrp1y.csv and address the following:
+
+- Statement: Among all high schools in Chicago with at least 80% of Freshmen on Track, the average of the 11th Grade Average ACT score is greater than or equal to 21. 
+
+If the statement is TRUE, then write TRUE and provide evidence of your answer. If the statement is FALSE, then write FALSE and provide evidence of your answer.
+
+Data description: The dataset contains 566 rows and 79 columns. The subjects are schools in the Chicago Public School system and their performance in various metrics of education. Some columns in this dataset include School ID and name, the type of school, Average student attendance, Rate of misconducts, 11th grade average ACT, Graduation rate, Freshmen on track %, Ward, and Location. Original source is City of Chicago.
+
+**Answer:** FALSE. The average 11th grade average ACT score among high schools with an 80% freshmen on track rate is 19.344.
+
+```{r prob8}
+rm(driver) #removing previous dataset from R's internal memory
+cps <- read_csv("https://uofi.box.com/shared/static/iwdcncwuotz0wv8ax6yv1dbfjdtdrp1y.csv") #import data
+
+acts <- cps %>% 
+  filter(`Elementary, Middle, or High School`=="HS", `Freshman on Track Rate %`>=80,`11th Grade Average ACT (2011)`!="NDA") %>% #retain High Schools, 80% or more Freshman on Track Rate, and drops NDA rows of 11th Grade Average ACT column
+  select(`11th Grade Average ACT (2011)`) #selects only 11th Grade Average ACT column
+
+mean(as.numeric(acts$`11th Grade Average ACT (2011)`), na.rm=TRUE) #takes mean of 11th Grade Average ACT column, removes NAs just in case any still present
+```
+
+**#9** (Accessing and importing data, Reshaping data, Arranging data, Data reduction, Data expansion, Loops and conditional execution, Apply family of functions, Vectorization) Import the Chicago Crimes Data using its URL https://uofi.box.com/shared/static/xiipn7u18rcddau1q0elih3y7jcusket.csv and address the following:
+
+- Among the case numbers with only one record (i.e. no duplicate case numbers) and arrests made, reshape the data using loops and conditional execution (not pivot_longer/pivot_wider) such that each Case number now has two rows and 2 new columns: one new column is "CrimeDescription" which takes its values from the Primary Description and Secondary Description columns' values, and second new column is "DescriptionType" takes its names from the names of the Primary Description and Secondary Description. Now, print the first 10 rows of the resulting data. **If a case number appears more than once, do not include it at all; consider it as the set of duplicate case numbers. This problem is asking about the set of non-duplicated case numbers.**
+
+Data description: The dataset contains 204133 rows and 17 columns. The subjects are reported crimes in Chicago such that some crimes have been resolved and others are not. Some of the data columns are Case number, Date of occurrence, Block, IUC, Primary description, Secondary description, Location description, and Arrest. Original source is City of Chicago.
+
+**Answer:** Cannot use reshape functions such as pivot_longer/wider, gather, spread.
+
+```{r prob9}
+rm(acts, cps) #removing previous dataset from R's internal memory
+crime <- read_csv("https://uofi.box.com/shared/static/xiipn7u18rcddau1q0elih3y7jcusket.csv", 
+    col_types = cols(`DATE  OF OCCURRENCE` = col_datetime(format = "%m/%d/%Y %H:%M:%S %p"))) #import data, reformat character column as datetime
+dim(crime) #show dimension of data
+
+ids<-names(table(crime$`CASE#`)[table(crime$`CASE#`)==1]) #create vector showing non-duplicate Case#s (non-duplicate here means the case number only appears once)
+cr0 <- crime %>% #assigning new object called cr0
+  filter(`CASE#`%in%ids, ARREST=="Y") #retains non-duplicate Case# rows and reports where an ARREST was made
+
+
+#cr0 %>%
+#  arrange(`CASE#`) %>%
+#  pivot_longer(c(`PRIMARY DESCRIPTION`, `SECONDARY DESCRIPTION`), names_to = "DescriptionType", #values_to = "CrimeDescription") #this is code to reshape with reshaping functions, but we cannot use these in this problem. This is simply a way to be sure what you're going to do is correct
+
+cr1 <- list() #make an empty list
+for (i in 1:length(cr0$`CASE#`)){ #i begins at 1 and ends at index of last non-duplicate Case#
+  cr1[[i]] <- rbind( c(cr0[i,-(5:6)], names(cr0[i,5]), cr0[i,5] ), c(cr0[i,-(5:6)], names(cr0[i,6]), cr0[i,6]) ) #reshaping the data for each index i: rows are row i of cr0 without 5th and 6th columns, column name of 5th column, 5th column value, row i of cr0 without 5th and 6th columns, column name of 6th column, and 6th column value
+}
+
+cr2 <- do.call(rbind,cr1) #binds the list into a data.frame
+
+colnames(cr2) <- c(colnames(cr2)[1:15],"DescriptionType", "CrimeDescription") #re-creates column names for data.frame to include the original first 15 columns of cr2 and two new columns called "DescriptionType" and "CrimeDescription"
+cr2 <- as.data.frame(cr2) #coerces object to data.frame
+print(cr2[1:10,]) #prints first 10 rows
+```
+
+**#10** (Accessing and importing data, Arranging data, Data reduction, Data expansion, Apply family of functions, Vectorization, Markdown) Import the Chicago 311 Service Requests for Abandoned Vehicles Data using its URL https://uofi.box.com/shared/static/7xlt7wshxuckkdiyqcs9i2e8mlaa2rg3.csv and address the following:
+
+- Using the loops and conditional execution, for each non-missing Ward show the median number of days the vehicles had been reported as parked.
+
+Data description: The dataset contains 261486 observations and 22 columns. The subjects are reports of abandoned vehicles around Chicago such that those reports are made to Chicago's 311 service. A vehicle can be classified as abandoned if it meets one or more of the following criteria: 1) On a public way in a state of disrepair as to be incapable of being driven in its present condition. 2) Has not been moved or used for more than seven consecutive days and is apparently deserted. 3) Has been left on the public way without state registration or a temporary state registration placard for two or more days. 4) Is a hazardous dilapidated vehicle left in full view of the general public, whether on public or private property. Requests that have been labeled as Duplicates are in the same geographic area and have been entered into 311 Customer Service Requests (CSR) system at around the same time as a previous request. Duplicate reports/requests are labeled as such in the Status field, as either "Open - Dup" or "Completed - Dup." Original source is City of Chicago.
+
+**Answer:** 
+
+```{r prob10}
+rm(crime, cr0, cr1, cr2) #removing previous dataset from R's internal memory
+x311 <- read_csv("https://uofi.box.com/shared/static/7xlt7wshxuckkdiyqcs9i2e8mlaa2rg3.csv", 
+    col_types = cols(`Creation Date` = col_date(format = "%m/%d/%Y"), 
+        `Completion Date` = col_date(format = "%m/%d/%Y"))) #import data, reformat columns
+
+gs <- unique(x311$Ward) #collect unique vector of Ward numbers
+meds <- rep(NA,length(gs)) #create vector of same length of unique Ward numbers
+for (i in 1:length(gs)){ #loop begins at 1 and ends at the index of the last unique Ward number
+  meds[i] <- median(drop_na(x311[x311$Ward==gs[i],11])$`How Many Days Has the Vehicle Been Reported as Parked?`) #computes median of Days Vehicle Been Reported as Parked among each unique Ward after removing NA values
+}
+meds #show medians of each Ward
+rm(meds) #remove object from R's internal memory
+```

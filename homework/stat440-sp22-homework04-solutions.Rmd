@@ -1,0 +1,296 @@
+---
+title: "STAT 440 Statistical Data Management - Spring 2022"
+output: html_document
+---
+
+## Homework04
+### Due: Monday April 04, 2022 11:59 pm US Central Time
+#### Created by Christopher Kinson
+
+Grading Rubric (per question):  
+2 points if complete and correct  
+1 point if incomplete or incorrect  
+0 points if no attempt made  
+
+
+**Retrieving your work**
+
+This and all future homework .Rmd files are written in Markdown. The .Rmd file can be rendered as an .html file for easier viewing. This and all future homework assignments are located in the **homework** directory within the **stat440-sp22-course-content** repo, i.e. **stat440-sp22-course-content/homework** in GitHub. It is always recommended that you **pull** (or refresh) the **stat440-sp22-course-content** repo to ensure that you have the most updated version of all course content including the homework assignments. After pulling (or refreshing) the **stat440-sp22-course-content** repo, the homework file will be in the homework directory. Once you have opened the .Rmd file, you may begin writing your answers beneath each problem. Do not remove any of the original problems from the file, because that makes it more difficult for the course staff to grade your assignment. 
+
+**Submitting your work**
+
+In your individual student repo (named as your netID), you are to submit ***two*** files:
+
+a. Your reproducible document file (.Rmd) which should be saved as homework#-netID.Rmd. For example, my homework 01 file would be saved as homework01-kinson2.Rmd.
+
+b. Your rendered reproducible document file (.html) which should be saved as homework#-netID.html. For example, my homework 01 file would be saved as homework01-kinson2.html.
+
+**Do not place your files in a sub-directory (or folder).** You have an unlimited number of submissions, but only the latest proper submission (commit and push) will be viewed and graded. **Remember the .Rmd file needs to render properly to .html before submitting.** 
+
+
+***
+
+Undergraduates are expected to complete the problems **#1-#8**. Graduate students are expected to complete all problems.
+
+**The following problems should be completed by you as an individual. If any problem asks you a particular question, be sure to answer it completely (with code, written sentences, or both). Written sentences should not appear in code chunks or code cells. Written sentences should appear in Markdown syntax unless specifically stated otherwise.**
+
+***Do not change anything in this file above the double line. Doing so will prevent your homework from being graded.***
+
+***
+***
+
+### Use the URLs to access the data. No local files allowed.
+
+
+**#1** This problem includes concepts from the following notes/videos: Markdown.
+
+**Problem:** Using Markdown syntax, make a numbered list with your netID in normal text as the first item and full name in normal text as the second item.
+
+**Answer:** Answers will vary, but must be a proper list with netID in bold text and last name as second item in normal text. For example,
+
+1. **netID**
+
+2. Your Full Name
+
+**#2** This problem includes concepts from the following notes/videos: Markdown.
+
+**Problem:** Think about the previous two weeks (your experiences, assignments, and life). Using Markdown, describe in paragraph form (with at least 3 complete sentences): what was the most challenging part(s) about those weeks, and the thing(s) that made your weeks successful or unsuccessful.
+
+**Answer:** Answers will vary, graded for completeness.
+
+**#3** This problem includes concepts from the following notes/videos: Tool-making and programming Part01, Markdown.
+
+**Problem:** If the statement below is TRUE, then write TRUE in the **Answer** section and provide evidence (code and results) that it is TRUE. If the statement below is FALSE, then write FALSE in the **Answer** section and provide evidence (code and results) that it is FALSE.
+
+- Statement: R's `return()` function is always required for a user-defined function to operate.
+
+**Answer:** FALSE  
+
+```{r prob3}
+exc <- function(n,rho){
+  mat <- array(rho,dim=c(n,n))
+  mat2 <- array(c(1:n,1:n),dim=c(n,2))
+  mat[mat2] <- 1 
+  mat
+}
+exc(5,0.5)
+```
+
+**#4** This problem includes concepts from the following notes/videos: Tool-making and programming Part01, Markdown.
+
+**Problem:** If the statement below is TRUE, then write TRUE in the **Answer** section and provide evidence (code and results) that it is TRUE. If the statement below is FALSE, then write FALSE in the **Answer** section and provide evidence (code and results) that it is FALSE.
+
+- Statement: Arguments in a user-defined function in R are not required to be named.
+
+**Answer:** TRUE  
+
+```{r prob4}
+exc <- function(n,rho){
+  mat <- array(rho,dim=c(n,n))
+  mat2 <- array(c(1:n,1:n),dim=c(n,2))
+  mat[mat2] <- 1 
+  mat
+}
+exc(5,0.5)
+```
+
+**#5** This problem includes concepts from the following notes/videos: Accessing and importing data, SQL for weeks 03-07 content, SQL sub-queries.
+
+**Problem:** After importing the Champaign County Sheriff Office & Jail Data using its data URL https://uofi.box.com/shared/static/b6kuknulot4bqyo7elc8gmm6qzhnk766.dat, use any SQL-specific cleaning data approaches to correct the misspelled cities: Champaign and Urbana. Your resulting evidence should be written in the **Answer** section below and appear as a table or tibble containing the counts of these two cities (corrected spellings).
+
+- Data description for Champaign County Sheriff Office & Jail Data: The dataset contains 11082 observations and 40 columns for individuals who were booked into jail in Champaign County Jail in the year 2019. The individuals are identifiable based on personal identity, and they are given unique jacket numbers. Some rows in the data appear more than once because of multiple crimes being assigned to one person. But there is also the possibility of there being recidivists. A recidivist is a person who goes to jail repeatedly (more than one datetime). The demographics of the people, reasons for being booked, and crime code are also given in the data. The original source is the Champaign County Sheriff Office & Jail (CCSO).
+
+**Answer:** 
+
+```{r prob5}
+library(tidyverse)
+library(jsonlite)
+library(sqldf)
+jail_data <- read_csv("https://uofi.box.com/shared/static/b6kuknulot4bqyo7elc8gmm6qzhnk766.dat", 
+    col_types = cols(booking_date = col_date(format = "%m/%d/%Y"), 
+        booking_time = col_time(format = "%H:%M:%S"), 
+        released_date = col_date(format = "%m/%d/%Y"), 
+        released_time = col_time(format = "%H:%M:%S"))) #import data and reformat columns as dates and times
+
+cu <- sqldf("SELECT jacket_number, `age arrest`, state, sex, race, city3 AS city
+      FROM (SELECT jacket_number, `age arrest`, state, sex, race, city, CASE 
+          WHEN city='CHAAMPAIGN' THEN 'CHAMPAIGN'
+          WHEN city='CHAMAIGN' THEN 'CHAMPAIGN'
+          WHEN city='CHAMAPAIGN' THEN 'CHAMPAIGN'
+          WHEN city='CHAMAPIAGN' THEN 'CHAMPAIGN'
+          WHEN city='CHAMAPIGN' THEN 'CHAMPAIGN'
+          WHEN city='CHAMPAGIN' THEN 'CHAMPAIGN'
+          WHEN city='CHAMPAIGN' THEN 'CHAMPAIGN'
+          WHEN city='CHAMPAIGN,' THEN 'CHAMPAIGN'
+          WHEN city='CHAMPAING' THEN 'CHAMPAIGN'
+          WHEN city='CHAMPIAGN' THEN 'CHAMPAIGN'
+          WHEN city='URBANA' THEN 'URBANA'
+          WHEN city='URANA' THEN 'URBANA'
+          WHEN city='URBNANA' THEN 'URBANA'
+          ELSE 'NA'
+          END AS city3
+      FROM jail_data
+      WHERE city3='CHAMPAIGN' OR city3='URBANA'
+      ORDER BY city)
+      ") #using CASE WHEN to change strings of city names to correct spelling much like ifelse
+
+sqldf("SELECT city, COUNT(city) AS n
+      FROM cu
+      GROUP BY city
+      ")
+```
+
+**#6** This problem includes concepts from the following notes: SQL for weeks 03-07 content, SQL sub-queries, Markdown.
+
+**Problem:** Beginning with the data imported in **Problem 5**, answer the following question in complete sentence(s) using Markdown syntax and showing SQL code and results as evidence of your answer.
+
+- **How many recidivists had a change in employment status?** Write your answer in the **Answer** section below in Markdown syntax with complete sentence(s) and show SQL code and result as evidence. Hint: There are 915 recidivists in the data.
+
+**Answer:** 441 recidivists had a change in employment status.
+
+```{r prob6}
+recidivist <- sqldf("SELECT jacket_number, COUNT(jacket_number) AS jid
+      FROM (SELECT DISTINCT new_id, booking_number, jacket_number,`age arrest`, race, sex
+      FROM (SELECT booking_number, jacket_number,`age arrest`, race, sex, booking_number + jacket_number AS new_id
+      FROM jail_data))
+      GROUP BY jacket_number
+      HAVING jid>1
+      ")
+recidivist_jackets <- sqldf("SELECT jacket_number
+      FROM recidivist")
+
+reci_empl <- sqldf("SELECT jacket_number, employment_status
+        FROM jail_data
+        WHERE jacket_number IN recidivist_jackets
+        GROUP BY jacket_number, employment_status
+      ")
+reci_empl2 <- sqldf("SELECT jacket_number, COUNT(*) AS n_jn
+        FROM reci_empl
+        GROUP BY jacket_number
+        HAVING n_jn >1
+        ")
+sqldf("SELECT COUNT(jacket_number)
+        FROM reci_empl2
+        ")
+```
+
+**#7** This problem includes concepts from the following notes/videos: Arranging data, Data reduction, Data expansion, Vectorization, Regular expressions and string manipulation, Summarizing data, Combining data, SQL for weeks 03-07 content, SQL sub-queries, Tool-making and programming Part01, Data visualization using base R, Markdown.
+
+**Problem:** Use any data management concepts in order to recreate the data visualization below in the **Answer** section using base R visualization methods. Your recreated data visualization should appear almost identical to the one shown below. Screenshots will not be accepted. Your image must be rendered based on your code. SQL is not required.
+
+![Image07](https://uofi.box.com/shared/static/ueyq26ml814rejclxca1a9kmc6h8ijwr.png)
+
+**Answer:**
+
+```{r prob7}
+plot_names <- c("NAmerican", "Unknown", "APIslander", names(sort(table(jail_data$race)))[4:6])
+
+plot_at<-barplot(sort(table(jail_data$race)), horiz = TRUE, border=NA, names.arg = "", axes=FALSE, col=blues9[4:9], main="Champaign County Jail Bookings in 2019")
+
+axis(2, at=plot_at, las=1, labels=plot_names, tick=FALSE,mgp=c(2,0,0)) 
+
+text(c(175,250,375,850,3600,5900), plot_at+0.4, label=c(sort(table(jail_data$race)),rep("",length(sort(table(jail_data$race)))-2)), pos=1, cex=1.5, las=1, col=c(rep("black",4),rep("white",2)))
+```
+
+**#8** This problem includes concepts from the following notes/videos: SQL for weeks 03-07 content, SQL sub-queries.
+
+**Problem:** Import the 2020 NBA Season Data (four datasets total) using these four URLs https://uofi.box.com/shared/static/grgt4wkiumfjgpug3fsx2vfkipv5rxz1.json, https://uofi.box.com/shared/static/af959qr9ewjgain1obkzmagapkmw8wbj.json, https://uofi.box.com/shared/static/raqot999l9yo6qz26k13epitft9j2ay4.json, https://uofi.box.com/shared/static/gcyl1gya0qkoceg0vpydd26mpwczrs56.json, and address the following (in this order) using at least two SQL subqueries and SQL-specific data management concepts:
+
+  - combine the four data sets into a new object called "nba2020"
+
+  - summarize the data such that all basketball statistics are totaled across all stints per player; there should only be 540 players after summarizing; use the final stint's Position, Age, and Team for each player
+
+  - mutate a new column called "REBOUNDS" that represents a combination of offensive rebounds and defensive rebounds
+
+  - mutate a new column called "ATO" that represents the assists to turnovers ratio (assists divided by turnovers)
+
+  - mutate a new column called "PTM" that represents the points to minutes played ratio (points divided by minutes played)
+
+  - mutate a new column called "3PP" that represents three-point shots made out of three-point attempts multiplied by 100
+
+  - de-select the stint column
+
+- Now, print the first 15 observations of the resulting "nba2020" data object such that the data is sorted by PTM in descending order and only the following columns are selected: PlayerName, PlayerID, Pos, Tm, Age, PTM.
+
+- Data description for the 4 NBA 2020 Season datasets: The dataset (four .json files) contains a total of 540 unique observations and 26 columns. The observations are professional basketball players in the National Basketball Association (NBA) and their season statistics for the 2020-2021 season. A stint is the duration of time someone worked for a particular employer. In this basketball data, a stint is a number representing the time a player was with a particular team. Some players are traded during the season, which means they would have more than 1 stint. A player's basketball statistics start over for each stint they have in a season. There are 540 unique player IDs across all stints. The original source is the NBA and Sports Reference. Also see the [2020 NBA Data Key](https://uofi.box.com/shared/static/oe2bbjn0xyhs9azbxaz00ab5ua6nbr9r.pdf).
+
+**You may use tidyverse functionality to clean the fourth NBA dataset, but all other parts should be done in SQL.**
+
+**Answer:** 
+
+```{r prob8}
+nba1 <- fromJSON("https://uofi.box.com/shared/static/grgt4wkiumfjgpug3fsx2vfkipv5rxz1.json")
+nba2 <- fromJSON("https://uofi.box.com/shared/static/af959qr9ewjgain1obkzmagapkmw8wbj.json")
+nba3 <- fromJSON("https://uofi.box.com/shared/static/raqot999l9yo6qz26k13epitft9j2ay4.json")
+nba4 <- fromJSON("https://uofi.box.com/shared/static/m2bnj0a2lize6t9ln3z9gd97jnwm0b6d.json")
+
+nbac <- sqldf("SELECT *, count(PlayerID) AS ntimes
+      FROM (SELECT *
+      FROM (SELECT *
+      FROM nba4
+      UNION
+      SELECT *
+      FROM nba3
+      UNION
+      SELECT *
+      FROM nba2
+      UNION
+      SELECT *
+      FROM nba1)
+      ORDER BY stint DESC)
+      GROUP BY PlayerID
+      ")
+
+nbac2 <- sqldf("SELECT PlayerName, PlayerID, Pos, Tm, Age, sum(G) AS G, sum(GS) AS GS, sum(MP) AS MP, sum(FG) AS FG, sum(FGA) AS FGA, sum(`3P`) AS `3P`, sum(`3PA`) AS `3PA`, sum(`2P`) AS `2P`, sum(`2PA`) AS `2PA`, sum(FT) AS FT, sum(FTA) AS FTA, sum(ORB) AS ORB, sum(DRB) AS DRB, sum(AST) AS AST, sum(STL) AS STL, sum(BLK) BLK, sum(TOV) AS TOV, sum(PF) AS PF, sum(PTS) AS PTS
+      FROM nbac
+      GROUP BY PlayerID
+      ")
+
+nba2020 <- sqldf("SELECT *, 1.0*AST/TOV AS ATO, 1.0*PTS/MP AS PTM, 100.0*`3P`/`3PA` AS `3PP`, ORB+DRB AS REBOUNDS
+                    FROM nbac2
+                    ")
+
+sqldf("SELECT PlayerName, PlayerID, Pos, Tm, Age, PTM, PTS, MP
+      FROM nba2020
+      ORDER BY PTM DESC
+      LIMIT 15")
+```
+
+**#9**  This problem includes concepts from the following notes/videos: SQL for weeks 03-07 content, SQL sub-queries.
+
+**Problem:** Using the 2020 Season NBA Data (**imported in Problem 8**), apply SQL-specific data management concepts to answer the following question:
+
+- **Which (if any) of the 15 most efficient players made the 2020 US Olympic Basketball Team?** Write your answer in the **Answer** section below in Markdown syntax with complete sentence(s) and show SQL code and result as evidence. The formula for efficiency is: $$\frac{PTS + TRB + AST + STL + BLK - \big((FGA - FG) + (FTA - FT) + TOV)\big)}{G}$$ This link https://www.usab.com/mens/national-team/roster.aspx may be of assistance in identifying 2020 US Olympic Men's Basketball Team.
+
+**Answer:** Only two of the 15 most efficient players made the 2020 US Olympic Men's Basketball Team: Kevin Durant and Damian Lilliard.
+
+```{r prob9}
+sqldf("SELECT PlayerName, PlayerID, 1.0*(PTS+ORB+DRB+AST+STL+BLK-((FGA-FG)+(FTA-FT)+TOV))/G AS EFFICIENCY
+      FROM nba2020
+      ORDER BY EFFICIENCY DESC
+      LIMIT 15")
+```
+
+**#10** This problem includes concepts from the following notes/videos: Arranging data, Data reduction, Data expansion, Vectorization, Regular expressions and string manipulation, Summarizing data, Combining data, SQL for weeks 03-07 content, SQL sub-queries, Tool-making and programming Part01, Data visualization using base R, Markdown.
+
+**Problem:** Use any data management concepts in order to recreate the data visualization below in the **Answer** section using base R visualization methods. Your recreated data visualization should appear almost identical to the one shown below. Screenshots will not be accepted. Your image must be rendered based on your code. SQL is not required.
+
+![Image10](https://uofi.box.com/shared/static/jop3mha6u84zei5lcpj24mxd9l2nx5ga.png)
+
+**Answer:** 
+
+```{r prob10}
+nba2020 <- nba2020 %>%
+  mutate(Defensive = STL+BLK+DRB, Offensive = FT+FG+ORB+AST)
+
+line_players <- nba2020 %>%
+  filter(between(Offensive,500,1000),between(Defensive,500,1000), Offensive-Defensive<100)
+
+plot(nba2020$Offensive,nba2020$Defensive,col="lightgray",pch=16, frame.plot = FALSE, axes=FALSE, main="2020 NBA Season Offensive vs Defensive Play", xlab="Offensive = FT+FG+ORB+AST", ylab="Defensive = STL+BLK+DRB")
+abline(a=0,b=1)
+points(line_players$Offensive,line_players$Defensive,col=4,pch=16)
+text(line_players$Offensive-200,line_players$Defensive,col=4,label=line_players$PlayerName)
+axis(1, seq(0,1800,250), tick=FALSE)
+axis(2, seq(0,1000,250), tick=FALSE)
+grid()
+```
